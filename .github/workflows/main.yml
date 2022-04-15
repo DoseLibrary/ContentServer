@@ -83,6 +83,9 @@ jobs:
         run: |
           sudo chown -R $USER:$USER doseTemp
           sudo chmod 777 doseTemp/config.json
+          ls -la doseTemp/
+          ls -la doseTemp
+          ll
 
       - name: Build and run tests
         run: npm run ci
