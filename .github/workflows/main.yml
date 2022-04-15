@@ -79,4 +79,4 @@ jobs:
       - name: Build and run tests
         run: npm run ci
         env:
-          TEMP_DIRECTORY: temp/
+          TEMP_DIRECTORY: ~/temp/
