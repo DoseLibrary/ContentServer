@@ -47,6 +47,9 @@ jobs:
           --health-retries 5
 
     steps:
+      - name: Install sudo package
+        run: apt update && apt install sudo
+        
       - name: Change directory rights
         run: sudo chown -R $USER:$USER /home/github/actions-runner/_work/ContentServer
       # Downloads a copy of the code in your repository before running CI tests
