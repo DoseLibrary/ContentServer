@@ -58,7 +58,7 @@ jobs:
         
       - name: Make temp directory
         run: |
-          mkdir doseTemp
+          mkdir /home/doseTemp
 
       # Performs a clean installation of all dependencies in the `package.json` file
       # For more information, see https://docs.npmjs.com/cli/ci.html
@@ -77,6 +77,6 @@ jobs:
           dir: 'doseTemp/'
 
       - name: Build and run tests
-        run: sudo npm run ci
+        run: npm run ci
         env:
-          TEMP_DIRECTORY: doseTemp/
+          TEMP_DIRECTORY: /home/doseTemp/
