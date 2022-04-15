@@ -55,9 +55,6 @@ jobs:
         run: |
           apt-get update
           apt-get install -y libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libgconf-2-4 libnss3 libxss1 libasound2 libxtst6 xauth xvfb
-          
-      - name: Clean npm cache
-        run: chown -R 1001:121 "/github/home/.npm"
         
       - name: Make temp directory
         run: |
@@ -66,7 +63,7 @@ jobs:
       # Performs a clean installation of all dependencies in the `package.json` file
       # For more information, see https://docs.npmjs.com/cli/ci.html
       - name: Install Content Server dependencies
-        run: npm ci
+        run: export npm_config_cache=npm-cache && npm ci
 
       - name: Run Content Server lint
         run: npm run lint
