@@ -47,6 +47,8 @@ jobs:
           --health-retries 5
 
     steps:
+      - name: Change directory rights
+        run: sudo chown -R $USER:$USER /home/github/actions-runner/_work/ContentServer
       # Downloads a copy of the code in your repository before running CI tests
       - name: Check out repository code
         uses: actions/checkout@v2
@@ -58,7 +60,7 @@ jobs:
         
       - name: Make temp directory
         run: |
-          mkdir /home/doseTemp/
+          mkdir doseTemp/
 
       # Performs a clean installation of all dependencies in the `package.json` file
       # For more information, see https://docs.npmjs.com/cli/ci.html
@@ -74,9 +76,9 @@ jobs:
         with:
           name: "config.json"
           json: '{"database":{"host":"postgres","port":"5432","user":"postgres","password":"postgres","name":"TestServer"},"setup":{"done":true,"database":true,"admin":true},"mainServer":"http:\/\/localhost:3000"}'
-          dir: '/home/doseTemp/'
+          dir: 'doseTemp/'
 
       - name: Build and run tests
         run: npm run ci
         env:
-          TEMP_DIRECTORY: /home/doseTemp/
+          TEMP_DIRECTORY: doseTemp/
