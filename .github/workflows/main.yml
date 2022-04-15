@@ -78,8 +78,11 @@ jobs:
           name: "config.json"
           json: '{"database":{"host":"postgres","port":"5432","user":"postgres","password":"postgres","name":"TestServer"},"setup":{"done":true,"database":true,"admin":true},"mainServer":"http:\/\/localhost:3000"}'
           dir: 'doseTemp/'
+          
+      - name: Change temp rights
+        run: sudo chown -R $USER:$USER doseTemp
 
       - name: Build and run tests
-        run: sudo npm run ci
+        run: npm run ci
         env:
           TEMP_DIRECTORY: doseTemp/
