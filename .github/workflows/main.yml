@@ -58,7 +58,7 @@ jobs:
         
       - name: Make temp directory
         run: |
-          mkdir temp
+          mkdir doseTemp
 
       # Performs a clean installation of all dependencies in the `package.json` file
       # For more information, see https://docs.npmjs.com/cli/ci.html
@@ -74,9 +74,9 @@ jobs:
         with:
           name: "config.json"
           json: '{"database":{"host":"postgres","port":"5432","user":"postgres","password":"postgres","name":"TestServer"},"setup":{"done":true,"database":true,"admin":true},"mainServer":"http:\/\/localhost:3000"}'
-          dir: 'temp/'
+          dir: 'doseTemp/'
 
       - name: Build and run tests
         run: npm run ci
         env:
-          TEMP_DIRECTORY: ~/temp/
+          TEMP_DIRECTORY: doseTemp/
