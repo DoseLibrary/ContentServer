@@ -80,7 +80,9 @@ jobs:
           dir: 'doseTemp/'
           
       - name: Change temp rights
-        run: sudo chown -R $USER:$USER doseTemp
+        run: |
+          sudo chown -R $USER:$USER doseTemp
+          sudo chmod 777 doseTemp/config.json
 
       - name: Build and run tests
         run: npm run ci
