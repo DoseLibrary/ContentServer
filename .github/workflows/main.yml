@@ -77,6 +77,6 @@ jobs:
           dir: 'doseTemp/'
 
       - name: Build and run tests
-        run: npm run ci
+        run: sudo npm run ci
         env:
           TEMP_DIRECTORY: doseTemp/
