@@ -1,9 +1,8 @@
 <h1 align="center">DOSE</h1>
-![image](https://user-images.githubusercontent.com/8510654/166718874-d591ea8e-fd8d-4b36-8326-30cc9b1f7db3.png)
+<img src="https://user-images.githubusercontent.com/8510654/166718874-d591ea8e-fd8d-4b36-8326-30cc9b1f7db3.png"/>
 
 
 <div align="center">
-  <br></br>
   <img src="https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square" alt="Coverage status">
   <img src="https://github.com/GustavPS/Dose/actions/workflows/main.yml/badge.svg" alt="CI status">
   <img src="https://github.com/GustavPS/Dose/actions/workflows/codeql-analysis.yml/badge.svg" alt="Security status">
