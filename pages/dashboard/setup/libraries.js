@@ -49,11 +49,11 @@ export default class Libraries extends Component {
     }
 
     libraryError(error) {
+        console.log(`Library error: `, error);
         if (error === 400) {
             this.setState({ error: 'Access denied' });
         } else {
             this.setState({ error: error });
-            console.log(`Library error: `, error);
         }
         if (this.clearErrorTimeout) {
             clearTimeout(this.clearErrorTimeout);
@@ -123,9 +123,9 @@ export default class Libraries extends Component {
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: {
-                        libraries: JSON.stringify(this.state.libraries)
-                    }
+                    body: JSON.stringify({
+                        libraries: this.state.libraries
+                    })
                 })
                 .then(r => r.json())
                 .then(result => {
