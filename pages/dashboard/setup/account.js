@@ -146,7 +146,7 @@ export default class Register extends Component {
                         </Form.Group>
                         <Form.Group controlId="formBasicName">
                             <Form.Label>Content server IP</Form.Label>
-                            <Form.Control type="text" value={this.host} onChange={(e) => this.setState({ contentServerIp: e.target.value })} />
+                            <Form.Control type="text" placeholder={this.host} onChange={(e) => this.setState({ contentServerIp: e.target.value })} />
                         </Form.Group>
 
                         <br/>
