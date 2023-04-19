@@ -29,6 +29,7 @@ export default async (req, res) => {
         found: found,
         group: group
     }
+    console.log(result);
 
     res.set({
         'Access-Control-Allow-Origin': '*',

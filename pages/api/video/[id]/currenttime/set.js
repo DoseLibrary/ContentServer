@@ -45,6 +45,7 @@ export default (req, res) => {
         // Protect against old streaming clients
         if (group != undefined) {
             const progress = time / videoDuration * 100;
+            // Used to view active transcodings in the admin dashboard
             hlsManager.updateProgress(group, progress);
         }
     
