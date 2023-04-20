@@ -57,7 +57,6 @@ export const DirectoryChoice = ({onError, onRemove, onValueSaved, onTypeChanged,
 
     const changeDirectory = (folder) => {
         const oldDir = currentDir;
-        console.log(folder);
         currentDir = path.join(currentDir, folder);
 
         getDirectories(currentDir)
@@ -99,7 +98,6 @@ export const DirectoryChoice = ({onError, onRemove, onValueSaved, onTypeChanged,
     }
 
     const typeChanged = (event) => {
-        console.log("typechanged: " + event.target.value)
         if (onTypeChanged != undefined) {
             onTypeChanged(event.target.value);
         }
