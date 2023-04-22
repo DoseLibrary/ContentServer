@@ -47,7 +47,7 @@ export default (req, res) => {
         WHERE $1=ANY(c.genres)
         ORDER BY ${orderBy}
         OFFSET $2
-        LIMIT $3
+        LIMIT ${limit === 'ALL' ? 'ALL' : '$3'}
         `, [req.query.genre, offset, limit]).then(result => {
           let response = {
               result: result,
