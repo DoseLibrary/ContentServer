@@ -55,7 +55,7 @@ export default (req, res) => {
 
           ORDER BY ${orderBy}
           OFFSET $2
-          LIMIT $3
+          LIMIT ${limit === 'ALL' ? 'ALL' : '$3'}
           `, [req.query.genre, offset, limit]).then(async (result) => {
                 for (let i = 0; i < result.length; i++) {
                     const serie = result[i];
