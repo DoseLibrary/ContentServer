@@ -1,0 +1,20 @@
+{
+  "metadata": {
+    "displayName": "Directplay preparation",
+    "description": "Convert all files to AAC audio format"
+  },
+  "settings": {
+    "enabled": {
+      "type": "bool",
+      "default": false,
+      "value": false,
+      "displayName": "Enabled"
+    },
+    "timeInterval": {
+      "type": "number",
+      "default": 1800,
+      "value": 1800,
+      "displayName": "Time interval (seconds)"
+    }
+  }
+}
