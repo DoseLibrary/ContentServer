@@ -20,10 +20,15 @@ const GetStats = (req, res) => {
             response.movieCount = movies.count;
             db.one(`SELECT COUNT(*) FROM serie`).then(series => {
                 db.one(`SELECT COUNT(*) FROM serie_episode`).then(episodes => {
-                    response.showCount = series.count;
-                    response.episodeCount = episodes.count;
-                    res.status(200).json(response);
-                    resolve();
+                    db.one(`SELECT COUNT(*) FROM users`).then(users => {
+                        console.log(users)
+                        response.showCount = series.count;
+                        response.episodeCount = episodes.count;
+                        response.userCount = users.count;
+                        res.status(200).json(response);
+                        resolve();
+
+                    });
                 });
             });
         });

@@ -1,0 +1,12 @@
+.wrapper {
+    color: whitesmoke;
+}
+
+.contentWrapper {
+    margin: 0;
+    margin-left: 10rem;
+    padding: 0;
+    background-color: rgb(#121212);
+    height: 100vh;
+    overflow-y: hidden;
+}

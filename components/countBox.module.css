@@ -1,0 +1,19 @@
+.countBox {
+    width: 5rem;
+    margin-left: 3rem;
+    margin-right: 3rem;
+    display: flex;
+    flex-direction: row;
+    font-size: 1.2rem;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.countBoxText {
+    margin-left: 1rem;
+}
+
+.countBoxImage {
+    height: auto;
+    width: 4rem;
+}

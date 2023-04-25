@@ -1,0 +1,125 @@
+.menuWrapperActive {
+    width: 10rem;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    position: fixed;
+    display: flex;
+    flex-flow: column;
+    align-items: center;
+    background-color: rgb(31, 31, 31);
+    color: whitesmoke;
+    transition: all linear 0.2s;
+}
+
+
+
+
+.menuWrapperActive > .iconWrapper  {
+    padding-left: 1.5rem;
+}
+
+.menuWrapperActive > .logoutWrapper  {
+    padding-left: 1rem;
+}
+
+.menuWrapperActive > .accountWrapper  {
+    padding-left: 1rem;
+}
+
+.menuWrapperActive > .logoutWrapper > .showOnMenuActive {
+    display: inline-block !important;
+    color: whitesmoke;
+    width: auto;
+}
+
+.menuWrapperActive > .accountWrapper > .showOnMenuActive {
+    display: inline-block !important;
+    color: whitesmoke;
+    width: auto;
+}
+
+.menuWrapperActive > .iconWrapper > .showOnMenuActive {
+    display: inline-flex !important;
+    color: whitesmoke;
+    width: auto;
+}
+
+.iconWrapper {
+    width: inherit;
+    height: 4rem;
+    display: flex;
+    flex-flow: row;
+    text-align: center;
+    align-items: center;
+}
+
+.backArrowIcon {
+    display: none !important;
+    transition: all linear 0.2s;
+}
+
+.menuWrapperActive > .backArrowIcon {
+    display: inline-block !important;
+    position: absolute;
+    top: 0;
+    right: 0;
+    font-size: 2rem !important;
+    margin-right: 0.5rem;
+    padding: 0;
+}
+
+
+
+.icon {
+    font-size: 2rem !important;
+    margin-right: 0.5rem;
+}
+
+.iconWrapper:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
+
+.logoutWrapper {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    margin-left: 1rem;
+    margin-right: auto;
+    padding: 0;
+    margin-bottom: 1rem;
+
+    width: inherit;
+    height: 4rem;
+    margin-left: 0.5rem;
+    display: flex;
+    flex-flow: row;
+    text-align: center;
+    align-items: center;
+}
+
+.logoutWrapper:hover {
+    cursor: pointer;
+}
+
+.accountWrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-right: auto;
+    padding: 0;
+    margin-bottom: 1rem;
+
+    width: inherit;
+    height: 4rem;
+    margin-left: 0.5rem;
+    display: flex;
+    flex-flow: row;
+    text-align: center;
+    align-items: center;
+}
+
+.accountWrapper:hover {
+    cursor: pointer;
+}
