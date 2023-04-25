@@ -63,7 +63,7 @@ export default (req, res) => {
                 db.any(`
                 SELECT DISTINCT ON (p.episode_id, p.last_watched) i.name, i.air_date, i.overview, i.vote_average, i.added_date, i.air_date, p.episode_id AS internalEpisodeID, i.episode_number AS episode_number, j.name AS season_name,
                 j.season_id AS season_number, n.serie_id AS show_id, p.last_watched,
-                jsonb_agg(DISTINCT jsonb_build_object('path', m.path, 'active', k.active, 'type', k.type)) AS images
+                jsonb_agg(DISTINCT jsonb_build_object('path', m.path, 'active', k.active, 'type', k.type)) AS images, j.poster_path as season_poster, q.title as show_title
                 FROM user_next_episode p
 
                 INNER JOIN serie_episode n
@@ -80,10 +80,13 @@ export default (req, res) => {
                 ON i.serie_id = k.serie_id
                 INNER JOIN image m
                 ON k.image_id = m.id
+
+                INNER JOIN serie_metadata q
+                ON q.serie_id = i.serie_id
     
                 WHERE p.user_id = $1 AND p.serie_id = n.serie_id
 
-                GROUP BY i.name, i.air_date, i.overview, i.vote_average, i.added_date, i.air_date, n.id, p.episode_id, j.name, i.episode_number, j.season_id, n.serie_id, p.last_watched
+                GROUP BY i.name, i.air_date, i.overview, i.vote_average, i.added_date, i.air_date, n.id, p.episode_id, j.name, i.episode_number, j.season_id, n.serie_id, p.last_watched, j.poster_path, q.title
                 ORDER BY p.last_watched DESC
                 `, [user_id]).then(result => {
                     response.upcoming = result;
