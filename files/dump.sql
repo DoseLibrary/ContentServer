@@ -91,9 +91,7 @@ create table movie_metadata
     tmdb_id                   integer default '-1'::integer,
     found_good_poster         boolean default false,
     found_good_backdrop       boolean default false,
-    found_good_logo           boolean default false,
-    preview_extracted         boolean default false,
-    preview_extraction_failed boolean default false
+    found_good_logo           boolean default false
 );
 
 create table serie
@@ -154,8 +152,6 @@ create table serie_episode_metadata
             on delete cascade,
     added_date                text    not null,
     run_time                  integer default '-1'::integer,
-    preview_extracted         boolean default false,
-    preview_extraction_failed boolean default false,
     constraint serie_episode_metadata_pkey
         primary key (episode_number, season_number, serie_id)
 );

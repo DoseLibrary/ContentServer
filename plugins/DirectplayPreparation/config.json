@@ -7,7 +7,7 @@
     "enabled": {
       "type": "bool",
       "default": false,
-      "value": false,
+      "value": true,
       "displayName": "Enabled"
     },
     "timeInterval": {
