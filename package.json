@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon --exec babel-node --trace-warnings server.js",
+    "dev": "nodemon --ignore 'plugins/*/*.json' --exec babel-node --trace-warnings server.js",
     "build": "next build",
     "linuxStart": "NODE_ENV=production node server.js",
     "windowsStart": "node server.js",
