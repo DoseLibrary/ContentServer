@@ -91,7 +91,7 @@ create table movie_metadata
     tmdb_id                   integer default '-1'::integer,
     found_good_poster         boolean default false,
     found_good_backdrop       boolean default false,
-    found_good_logo           boolean default false,
+    found_good_logo           boolean default false
 );
 
 create table serie
