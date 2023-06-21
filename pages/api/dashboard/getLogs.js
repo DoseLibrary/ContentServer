@@ -1,5 +1,3 @@
-import { log } from 'console';
-
 const fs = require('fs');
 const path = require('path');
 
@@ -19,7 +17,6 @@ const GetLogs = (req, res) => {
 
         let dateString = req.query.date;
         const logGroup = req.query.group;
-        console.log(logGroup)
 
         if(dateString == null) {
             const d = new Date();
@@ -28,7 +25,6 @@ const GetLogs = (req, res) => {
 
         const logDir = path.resolve(__dirname, `../../../../../logs/${dateString}`);
 
-        console.log(logDir)
         if (!fs.existsSync(logDir)){
             res.status(404).json({"message": "No log directory found"});
         }

@@ -5,8 +5,6 @@ import validateDashboardAccess from '../../lib/validateDashboardAccess';
 
 import Styles from '../../styles/logs.module.css';
 
-import { Router } from 'next/router';
-
 export default class Index extends Component {
     constructor(props) {
         super(props);
