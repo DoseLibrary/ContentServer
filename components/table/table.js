@@ -1,7 +1,8 @@
 import { Component } from 'react';
 import React from 'react';
-import 'tailwindcss/tailwind.css';
 import equal from 'fast-deep-equal';
+import Styles from './table.module.css';
+
 
 
 export default class Table extends Component {
@@ -30,12 +31,8 @@ export default class Table extends Component {
                     return this.state.columns[columnIndex].dataRender(column);
                 } else {
                     return (
-                        <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                                <div className="ml-4">
-                                    <div className="text-sm font-medium text-white">{column.value}</div>
-                                </div>
-                            </div>
+                        <td className={Styles.tdata}>
+                            <div>{column.value}</div>
                         </td>
                     )
                 }
@@ -48,34 +45,28 @@ export default class Table extends Component {
             <>
                 <h1>{this.title}</h1>
                 <br />
-                <div className="flex flex-col">
-                    <div className="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-                        <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-                            <div className="shadow overflow-hidden border-b border-gray-900 sm:rounded-lg">
-                                <table className="min-w-full divide-y divide-gray-900">
-                                    <thead className="bg-gray-800">
-                                        <tr scope="col">
-                                            {this.state.columns.map(column => (
-                                                column.render ? column.render(column.title) : column.title
-                                            ))}
-                                        </tr>
-                                    </thead>
-                                    <tbody className=" bg-gray-800 divide-y divide-gray-900">
-                                        {this.state.data.map((row, rowNum) => {
+                <div className={Styles.tableWrapper}>
+                    <table className={Styles.table}>
+                        <thead className={Styles.thead}>
+                            <tr className={Styles.trow} scope="col" key="header">
+                                {this.state.columns.map(column => (
+                                    column.render ? column.render(column.title) : column.title
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody className={Styles.tbody}>
+                            {this.state.data.map((row, rowNum) => {
 
-                                            return (
-                                                <tr key={rowNum}>
-                                                    {row.map((column, columnNum) => {
-                                                        return this.renderData(row, columnNum);
-                                                    })}
-                                                </tr>
-                                            )
+                                return (
+                                    <tr className={Styles.trow} key={rowNum}>
+                                        {row.map((column, columnNum) => {
+                                            return this.renderData(row, columnNum);
                                         })}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
+                                    </tr>
+                                )
+                            })}
+                        </tbody>
+                    </table>
                 </div>
             </>
         )

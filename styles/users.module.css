@@ -1,0 +1,76 @@
+.centerContent {
+    align-items: center;
+    display: flex;
+    padding-left: 1rem;
+    height: 4rem;
+    text-align: center;
+}
+
+.tableText {
+    font-size: 1.1rem;
+    font-family: sans-serif;
+    padding-left: 1rem;
+}
+
+.iconButton {
+    font-size: 1rem;
+}
+
+.iconButton:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+.centerText {
+    text-align: center;
+}
+
+.accessCheckbox {
+    padding-left: 4rem;
+}
+
+.inputForm {
+    display: inline-flex;
+
+}
+
+.inputField {
+    width: 15rem;
+    margin-right: 0.5rem;
+    background-color: rgb(65, 64, 64);
+    background-color: rgb(65, 64, 64);
+    color: white;
+    border: none;
+}
+
+.inputField:focus {
+    background-color: rgb(65, 64, 64);
+    color:white;
+    outline:none !important;
+    outline-width: 0 !important;
+    box-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+}
+
+.inputField::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: white;
+    opacity: 1; /* Firefox */
+}
+
+.saveIconButton {
+    width: 2rem !important;
+    height: 2rem !important;
+}
+
+.saveIconButton:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+
+.errorText {
+    color: rgb(134, 0, 0);
+    font-size: 1.2rem;
+    margin-left: 2rem;
+    align-self: center;
+}

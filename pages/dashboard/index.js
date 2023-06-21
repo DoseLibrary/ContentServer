@@ -4,9 +4,11 @@ import Layout from '../../components/layout';
 import CountBox from '../../components/countBox';
 import Transcoding from '../../components/transcoding';
 import validateDashboardAccess from '../../lib/validateDashboardAccess';
+import Styles from '../../styles/dashboard.module.css';
+
 import { Router } from 'next/router';
 
-export default class Register extends Component {
+export default class Index extends Component {
     constructor(props) {
         super(props);
         this.host = props.host;
@@ -15,9 +17,10 @@ export default class Register extends Component {
             transcodings: []
         }
 
-        this.movieCount = React.createRef();
-        this.showCount = React.createRef();
-        this.episodeCount = React.createRef();
+        this.movieCount = React.createRef(0);
+        this.showCount = React.createRef(0);
+        this.episodeCount = React.createRef(0);
+        this.userCount = React.createRef(0);
     }
 
     componentDidMount() {
@@ -34,6 +37,8 @@ export default class Register extends Component {
                 this.movieCount.current.setCount(data.movieCount);
                 this.showCount.current.setCount(data.showCount);
                 this.episodeCount.current.setCount(data.episodeCount);
+                this.userCount.current.setCount(data.userCount);
+
             });
         });
     }
@@ -56,24 +61,34 @@ export default class Register extends Component {
 
     render() {
         return (
-            <Layout>
-                <div className="flex flex-wrap justify-center w-full">
-                    <CountBox className="m-5 lg:w-3/12" type="Movies" ref={this.movieCount}  />
-                    <CountBox className="m-5 lg:w-3/12" type="Shows" ref={this.showCount} />
-                    <CountBox className="m-5 lg:w-3/12" type="Episodes" ref={this.episodeCount} />
+                <Layout>
+                <div className={Styles.container}>
+                    <div className={Styles.countBoxWrapper}>
+                        <CountBox type="Movies" ref={this.movieCount}  />
+                        <CountBox type="Shows" ref={this.showCount} />
+                        <CountBox type="Episodes" ref={this.episodeCount} />
+                        <CountBox type="Users" ref={this.userCount} />
+                    </div>
                 </div>
-                <div className=" h-auto p-3.5 shadow-2xl relative">
-                    <h2 className="text-gray-200 text-lg ml-2">Active transcodings</h2>
-                    <div className="flex h-full flex-wrap w-full md:justify-start justify-center">
-                        {this.state.transcodings.map((transcoding, index) => {
-                            return <Transcoding className="m-2"
-                                                key={index} 
-                                                title={transcoding.title}
-                                                username={transcoding.user.username}
-                                                quality={transcoding.quality}
-                                                backdrop={transcoding.backdrop}
-                                                progress={transcoding.watchProgress} />
-                        })}
+                <div className={Styles.transcodingContainer}>
+                    <div className={Styles.transcodingWrapper}>
+                        <h3 className={Styles.transcodingTitle}>Transcodings</h3>
+                        <div className={Styles.transcodingItems}>
+                            {this.state.transcodings.length > 0 &&
+                            
+                            this.state.transcodings.map((transcoding, index) => {
+                                return <Transcoding
+                                                    key={index} 
+                                                    title={transcoding.title}
+                                                    username={transcoding.user.username}
+                                                    quality={transcoding.quality}
+                                                    backdrop={transcoding.backdrop}
+                                                    progress={transcoding.watchProgress} />
+                            })}
+                            {this.state.transcodings.length == 0 &&
+                                <p>No Transcodings</p>
+                            }
+                        </div>
                     </div>
                 </div>
 

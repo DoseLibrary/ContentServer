@@ -1,21 +1,26 @@
 import { Component } from 'react';
 import React from 'react';
-import Link from 'next/link';
-import Router from 'next/router'
-import 'tailwindcss/tailwind.css';
-
+import Styles from './countBox.module.css';
+import GroupIcon from '@mui/icons-material/Group';
+import MovieIcon from '@mui/icons-material/Movie';
+import TvIcon from '@mui/icons-material/Tv';
+import DvrIcon from '@mui/icons-material/Dvr';
 
 export default class CountBox extends Component {
     constructor(props) {
         super(props);
-
-        this.type = props.type;
         this.state = {
             count: props.count
         }
+
+        this.type = props.type;
+
     }
 
     setCount(count) {
+        if(count == 1) {
+            this.type = this.type.slice(0, -1);
+        }
         this.setState({
             count: count
         });
@@ -24,11 +29,20 @@ export default class CountBox extends Component {
 
     render() {
         return (
-            <div className={this.props.className}>
-                <div className="align text-black shadow-2xl p-3.5 flex h-auto">
-                    <img alt="" src="/images/cinema.svg" className="w-10 mr-3" />
-                    <p className="text-sm text-white flex justify-center items-center"><strong className="text-2xl mr-1">{this.state.count}</strong>{this.type}</p>
-                </div>
+            <div className={Styles.countBox}>
+                    {(this.type == "Users" || this.type == "User") &&
+                        <GroupIcon fontSize="large" />
+                    }
+                    {(this.type == "Movies" || this.type == "Movie") &&
+                        <MovieIcon fontSize="large" />
+                    }
+                    {(this.type == "Shows" || this.type == "Show") &&
+                        <TvIcon fontSize="large" />
+                    }
+                    {(this.type == "Episodes" || this.type == "Episode") &&
+                        <DvrIcon fontSize="large" />
+                    }
+                    <p className={Styles.countBoxText}>{this.state.count} {this.type}</p>
             </div>
         )
     }

@@ -1,7 +1,50 @@
-.container {
+.container, .transcodingContainer {
     position: relative;
     justify-content: center;
     align-items: center;
-    height: 75vh;
     display: flex;
+    background-color: rgb(31, 31, 31);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 5px;
 }
+
+.transcodingContainer {
+    margin-top: 3vh;
+}
+
+.countBoxWrapper {
+    width: 100%;
+    display: inline-flex;
+    justify-content: center;
+    height: 10vh;
+    align-items: center;
+}
+
+.transcodingWrapper {
+    width: 100%;
+    display: block;
+    padding-left: 1rem;
+}
+
+.transcodingTitle {
+    margin-top: 1vh;
+    margin-bottom: 1vh;
+    font-size: 1.3rem;
+}
+
+.transcodingItems {
+    margin-bottom: 2vh;
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    width: 100%;
+}
+
+.transcodingItems h1 {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+

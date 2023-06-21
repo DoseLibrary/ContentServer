@@ -1,0 +1,76 @@
+.transcodingWrapper {
+    position: relative;
+    color: whitesmoke;
+    width: 16rem;
+    height: 9rem;
+    margin-left: 1rem;
+    margin-right: 1rem;
+    margin-top: 1rem;
+}
+
+.transcodingBackground {
+    background-size: cover;
+    background-position: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0.5;
+    height: inherit;
+    width: inherit;
+}
+
+.text {
+    opacity: 1 !important;
+    position: absolute;
+}
+
+.title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin-top: 0.1rem;
+    margin-left: 0.5rem;
+    width: inherit;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.username {
+    position: relative;
+    top: 7rem;
+    left: 0;
+    margin-top: 0.1rem;
+    margin-left: 0.5rem;
+    width: inherit;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.quality {
+    position: absolute;
+    top: 7rem;
+    left: 12.5rem;
+    margin-top: 0.1rem;
+    margin-right: 0.1rem;
+    width: inherit;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.progressBar {
+    position: absolute;
+    width: 16rem;
+    bottom: 0;
+    left: 0;
+    height: 0.25rem;
+    background-color: rgb(51, 51, 51);
+    overflow: hidden;
+}
+
+.progress {
+    display: flex;
+    flex-flow: column;
+    white-space: nowrap;
+    background-color: rgb(58, 163, 163);
+    height: inherit;
+}
