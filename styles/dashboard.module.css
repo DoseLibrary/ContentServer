@@ -1,21 +1,23 @@
-.container {
+.container, .transcodingContainer {
     position: relative;
     justify-content: center;
     align-items: center;
     display: flex;
-    margin-top: 5vh;
     background-color: rgb(31, 31, 31);
-    width: 95%;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
     border-radius: 5px;
+}
+
+.transcodingContainer {
+    margin-top: 3vh;
 }
 
 .countBoxWrapper {
     width: 100%;
     display: inline-flex;
     justify-content: center;
-    gap: 10rem;
     height: 10vh;
     align-items: center;
 }
@@ -24,7 +26,6 @@
     width: 100%;
     display: block;
     padding-left: 1rem;
-    min-height: 10vh;
 }
 
 .transcodingTitle {
@@ -34,11 +35,10 @@
 }
 
 .transcodingItems {
-    margin-bottom: 1vh;
+    margin-bottom: 2vh;
     display: inline-flex;
     flex-direction: row;
     flex-wrap: wrap;
-    justify-content: center;
     align-items: center;
     width: 100%;
 }

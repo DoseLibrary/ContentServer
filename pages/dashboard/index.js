@@ -50,31 +50,7 @@ export default class Index extends Component {
             .then(res => res.json())
             .then(data => {
                 this.setState({
-                    transcodings: [{
-                        title: "Iron man",
-                        user: {"username": "frippe9"},
-                        backdrop: "https://www.themoviedb.org/t/p/original/8EgxSaVRZwcm3pWChyW4j7yPplq.jpg",
-                        quality: "1080P",
-                        watchProgress: 23
-                    },{
-                        title: "Shazam! Fury of the Gods",
-                        user: {"username": "frippe9"},
-                        backdrop: "https://www.themoviedb.org/t/p/original/wybmSmviUXxlBmX44gtpow5Y9TB.jpg",
-                        quality: "1080P",
-                        watchProgress: 60
-                    },{
-                        title: "John wick",
-                        user: {"username": "frippe9"},
-                        backdrop: "https://www.themoviedb.org/t/p/w533_and_h300_bestv2/i8dshLvq4LE3s0v8PrkDdUyb1ae.jpg",
-                        quality: "720P",
-                        watchProgress: 98
-                    },{
-                        title: "65",
-                        user: {"username": "vezel"},
-                        backdrop: "https://www.themoviedb.org/t/p/w533_and_h300_bestv2/eSVu1FvGPy86TDo4hQbpuHx55DJ.jpg",
-                        quality: "1080P",
-                        watchProgress: 44
-                    }]
+                    transcodings: data
                 });
             });
         })
@@ -94,7 +70,7 @@ export default class Index extends Component {
                         <CountBox type="Users" ref={this.userCount} />
                     </div>
                 </div>
-                <div className={Styles.container}>
+                <div className={Styles.transcodingContainer}>
                     <div className={Styles.transcodingWrapper}>
                         <h3 className={Styles.transcodingTitle}>Transcodings</h3>
                         <div className={Styles.transcodingItems}>
@@ -110,7 +86,7 @@ export default class Index extends Component {
                                                     progress={transcoding.watchProgress} />
                             })}
                             {this.state.transcodings.length == 0 &&
-                                <h1>No Transcodings</h1>
+                                <p>No Transcodings</p>
                             }
                         </div>
                     </div>

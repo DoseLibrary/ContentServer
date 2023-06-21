@@ -4,6 +4,9 @@ import Layout from '../../components/layout';
 import validateDashboardAccess from '../../lib/validateDashboardAccess';
 import { Form } from 'react-bootstrap';
 import Table from '../../components/table/table';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PersonAddAltIcon from '@mui/icons-material/PersonAddAlt';
+import Styles from '../../styles/users.module.css';
 
 
 export default class Register extends Component {
@@ -38,17 +41,13 @@ export default class Register extends Component {
                 title: 'Username',
                 key: 'username',
                 render: () => (
-                    <th scope="col">
-                        <span className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</span>
+                    <th scope="col" className={Styles.tableText}>
+                        <span>Username</span>
                     </th>
                 ),
                 dataRender: (column) => (
-                    <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                            <div className="ml-4">
-                                <div className="text-sm font-medium text-white">{column.value}</div>
-                            </div>
-                        </div>
+                    <td className={Styles.centerContent}>
+                        <div className={Styles.tableText}>{column.value}</div>
                     </td>
                 )
             },
@@ -56,13 +55,15 @@ export default class Register extends Component {
                 title: 'Delete',
                 key: 'delete',
                 render: () => (
-                    <th></th>
+                    <th scope="col" className={Styles.centerText}>
+                        <span>Delete</span>
+                    </th>
                 ),
                 dataRender: (admin) => (
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <a href="#" className="text-indigo-600 hover:text-indigo-900" onClick={() => this.deleteAdmin(admin.extra.id)}>
+                    <td className={Styles.centerText}>
+                        <DeleteIcon href="#" className={Styles.iconButton} onClick={() => this.deleteAdmin(admin.extra.id)}>
                             {admin.value}
-                        </a>
+                        </DeleteIcon>
                     </td>
                 )
             }
@@ -75,17 +76,13 @@ export default class Register extends Component {
                 title: 'Username',
                 key: 'username',
                 render: () => (
-                    <th scope="col">
-                        <span className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</span>
+                    <th scope="col" className={Styles.tableText}>
+                        <span>Username</span>
                     </th>
                 ),
                 dataRender: (column) => (
-                    <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                            <div className="ml-4">
-                                <div className="text-sm font-medium text-white">{column.value}</div>
-                            </div>
-                        </div>
+                    <td className={Styles.centerContent}>
+                        <div className={Styles.tableText}>{column.value}</div>
                     </td>
                 )
             },
@@ -93,12 +90,12 @@ export default class Register extends Component {
                 title: 'Have access',
                 key: 'access',
                 render: () => (
-                    <th scope="col" className="text-right">
-                        <span className="px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Have access</span>
+                    <th scope="col" className={Styles.tableText}>
+                        <span>Have access</span>
                     </th>
                 ),
                 dataRender: (data) => (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
+                    <td className={Styles.accessCheckbox}>
                         <input type="checkbox" checked={data.value} onChange={(event) => this.setAccess(data.extra.id, event.target.checked)} />
                     </td>
                 )
@@ -107,15 +104,15 @@ export default class Register extends Component {
                 title: 'Delete',
                 key: 'delete',
                 render: () => (
-                    <th scope="col" className="text-right">
-                        <span className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Delete</span>
+                    <th scope="col" className={Styles.centerText}>
+                        <span>Delete</span>
                     </th>
                 ),
                 dataRender: (user) => (
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-right">
-                        <a href="#" className="text-indigo-600 hover:text-indigo-900" onClick={() => this.deleteUser(user.extra.id, user.extra.username)}>
+                    <td className={Styles.centerText}>
+                        <DeleteIcon href="#" className={Styles.iconButton} onClick={() => this.deleteUser(user.extra.id, user.extra.username)}>
                             {user.value}
-                        </a>
+                        </DeleteIcon>
                     </td>
                 )
             }
@@ -309,25 +306,22 @@ export default class Register extends Component {
             <Layout>
                 <Table title="Admin accounts" columns={this.getColumns()} data={this.getData()}></Table>
                 <br />
-                <div className=" flex flex-wrap relative">
-                    <Form.Control className="w-40 mr-3 bg-gray-800 border-gray-900 focus:bg-gray-800 text-white" type="text" placeholder="Username" onChange={(e) => this.setState({ username: e.target.value })} />
+                <div className={Styles.inputForm}>
+                    <Form.Control className={Styles.inputField} type="text" placeholder="Username" onChange={(e) => this.setState({ username: e.target.value })} />
 
-                    <Form.Control className="w-40 mr-3 bg-gray-800 border-gray-900 focus:bg-gray-800 text-white" type="password" placeholder="Password" onChange={(e) => this.setState({ password: e.target.value })} />
-                    <button className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded text-xs mr-3" onClick={this.createAdmin}>
-                        New
-                    </button>
-                    <p className="text-red-500 text-xs italic">{this.state.statusMessage}</p>
+                    <Form.Control className={Styles.inputField} type="password" placeholder="Password" onChange={(e) => this.setState({ password: e.target.value })} />
+                    <PersonAddAltIcon className={Styles.saveIconButton} onClick={this.createAdmin}></PersonAddAltIcon>
+                    <p className={Styles.errorText}>{this.state.statusMessage}</p>
                 </div>
 
                 <br></br>
+                <br></br>
                 <Table title="Users" columns={this.getUserColumns()} data={this.getUserData()}></Table>
                 <br />
-                <div className=" flex flex-wrap relative">
-                    <Form.Control className="w-40 mr-3 bg-gray-800 border-gray-900 focus:bg-gray-800 text-white" type="text" placeholder="Username" onChange={(e) => this.newUserNameChanged(e.target.value)} />
-                    <button className="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded text-xs mr-3" onClick={this.createUser}>
-                        Create
-                    </button>
-                    <p className="text-red-500 text-xs italic">{this.state.statusMessageUser}</p>
+                <div className={Styles.inputForm}>
+                    <Form.Control className={Styles.inputField} type="text" placeholder="Username" onChange={(e) => this.newUserNameChanged(e.target.value)} />
+                    <PersonAddAltIcon className={Styles.saveIconButton} onClick={this.createUser}></PersonAddAltIcon>
+                    <p className={Styles.errorText}>{this.state.statusMessageUser}</p>
                 </div>
             </Layout>
         )

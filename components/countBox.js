@@ -1,7 +1,5 @@
 import { Component } from 'react';
 import React from 'react';
-import Link from 'next/link';
-import Router from 'next/router'
 import Styles from './countBox.module.css';
 import GroupIcon from '@mui/icons-material/Group';
 import MovieIcon from '@mui/icons-material/Movie';

@@ -1,7 +1,6 @@
 import React, { FunctionComponent, useState, useEffect } from 'react';
 import Link from 'next/link';
 import styles from './menu.module.css';
-import TvIcon from '@material-ui/icons/Tv';
 import SettingsIcon from '@material-ui/icons/Settings';
 import LogoutIcon from '@material-ui/icons/ExitToApp';
 import HomeIcon from '@material-ui/icons/Home';
@@ -9,6 +8,7 @@ import FolderIcon from '@mui/icons-material/Folder';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import ExtensionIcon from '@mui/icons-material/Extension';
 import ArticleIcon from '@mui/icons-material/Article';
+import WebhookIcon from '@mui/icons-material/Webhook';
 
 type MenuProps = {}
 export const Menu: FunctionComponent<MenuProps> = () => {
@@ -47,6 +47,12 @@ export const Menu: FunctionComponent<MenuProps> = () => {
             <div className={styles.iconWrapper}>
                 <ExtensionIcon className={styles.icon}></ExtensionIcon>
                 <p className={styles.showOnMenuActive}>Plugins</p>
+            </div>
+            </Link>
+            <Link href="/dashboard/plugins">
+            <div className={styles.iconWrapper}>
+                <WebhookIcon className={styles.icon}></WebhookIcon>
+                <p className={styles.showOnMenuActive}>Integrations</p>
             </div>
             </Link>
             <Link href="/dashboard/logs">
