@@ -13,7 +13,6 @@ const SetUserAccess = (req, res) => {
         res = cors(res);
 
         if (!validateUser(token, process.env.DASHBOARD_SECRET)) {
-            console.log("nope" + token)
             res.status(403).end();
             return;
         }

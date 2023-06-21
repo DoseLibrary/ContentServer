@@ -3,7 +3,7 @@ import React from 'react';
 import Link from 'next/link';
 import Router from 'next/router'
 import Styles from './layout.module.css'
-import { Menu } from './menu/menu'
+import Menu from './menu/menu'
 
 export default class Register extends Component {
     constructor(props) {

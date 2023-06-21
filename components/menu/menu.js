@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useState, useEffect, Component } from 'react';
+import React, { Component } from 'react';
 import Link from 'next/link';
 import styles from './menu.module.css';
 import SettingsIcon from '@material-ui/icons/Settings';
