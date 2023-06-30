@@ -13,11 +13,10 @@ export default (req, res) => {
   return new Promise(resolve => {
         res = cors(res);
         let serieID = req.query.serie;
-        let token = req.query.token;
         let seasonID = req.query.season;
         let episodeID = req.query.episode;
 
-        let decoded = validateUser(token);
+        let decoded = validateUser(req);
         if (!decoded) {
             res.status(403).end();
             resolve();
