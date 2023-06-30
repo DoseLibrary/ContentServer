@@ -10,8 +10,7 @@ const getDirectories = (source) =>{
 }
 
 export default function handler(req, res) {
-    const token = req.query.token;
-    if (!validateUser(token, process.env.DASHBOARD_SECRET)) {
+    if (!validateUser(req, process.env.DASHBOARD_SECRET)) {
         res.status(403).end();
         resolve();
         return;

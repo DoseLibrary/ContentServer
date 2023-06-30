@@ -1,0 +1,43 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh;
+    flex-wrap: wrap;
+    padding: 1rem;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    width: 15rem;
+    height: 10rem;
+    margin: 2rem;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background-color: rgb(31, 31, 31);
+    padding: 1rem;
+}
+
+
+.card span {
+    font-size: 1.2rem;
+}
+
+.cardHeader {
+    display: inline-flex;
+    text-align: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.cardTitle {
+    font-size: 2rem !important;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+}
