@@ -13,9 +13,9 @@ const getTrailer = async (req, res) => {
       res.setHeader('Access-Control-Allow-Headers', "*");
 
       const id = req.params.id;
-      const { token, type } = req.query;
+      const { type } = req.query;
 
-      if (!validateUser(token)) {
+      if (!validateUser(req)) {
           res.status(403).end();
           resolve();
           return;

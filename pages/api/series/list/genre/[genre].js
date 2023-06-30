@@ -16,8 +16,7 @@ export default (req, res) => {
         let offset = req.query.offset ? req.query.offset : '0';
         let limit = req.query.limit ? req.query.limit : '20';
 
-        let token = req.query.token;
-        const user = validateUser(token);
+        const user = validateUser(req);
         if (!user) {
             res.status(403).end();
             resolve();

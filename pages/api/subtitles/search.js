@@ -11,8 +11,7 @@ export default (req, res) => {
         let type = req.query.type;
         let id = req.query.id;
 
-        let token = req.query.token;
-        if (!validateUser(token)) {
+        if (!validateUser(req)) {
             res.status(403).end();
             resolve();
             return;

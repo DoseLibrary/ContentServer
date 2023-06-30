@@ -21,9 +21,8 @@ export default (req, res) => {
         let serie_id = parseInt(req.query.serie_id);
         let season_number = parseInt(req.query.season);
         let episode_number = parseInt(req.query.episode);
-        let token = req.query.token;
 
-        if (!validateUser(token)) {
+        if (!validateUser(req)) {
             res.status(403).end();
             resolve();
             return;

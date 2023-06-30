@@ -17,10 +17,9 @@ export default (req, res) => {
     
         // TODO: Error handling
         let content_id = req.query.id;
-        let token = req.query.token;
         let type = req.query.type;
 
-        let decoded = validateUser(token);
+        let decoded = validateUser(req);
         if (!decoded) {
             res.status(403).end();
             resolve();

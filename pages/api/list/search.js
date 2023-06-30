@@ -7,9 +7,8 @@ const Search = (req, res) => {
         res = cors(res);
 
         let query = req.query.query;
-        let token = req.query.token;
 
-        if (!validateUser(token)) {
+        if (!validateUser(req)) {
             res.status(403).end();
             resolve();
             return;

@@ -22,8 +22,7 @@ export default (req, res) => {
         'Content-Type': 'text/plain; charset=utf-8',
     });
     return new Promise(async (resolve) => {
-        let token = req.query.token;
-        if (!validateUser(token)) {
+        if (!validateUser(req)) {
             res.status(403).end();
             resolve();
             return;
