@@ -1,0 +1,9 @@
+.centeredContainer {
+    position: relative;
+    background-color: rgb(31, 31, 31);
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 5px;
+    padding: 10px;
+}
