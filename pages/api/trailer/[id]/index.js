@@ -12,7 +12,6 @@ const getTrailer = async (req, res) => {
       res.setHeader('Access-Control-Allow-Origin', "*");
       res.setHeader('Access-Control-Allow-Headers', "*");
 
-      console.log(req.query)
       const id = req.params.id;
       const type = req.query.type;
 

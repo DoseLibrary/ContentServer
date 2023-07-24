@@ -1,6 +1,8 @@
 FROM node:16-alpine
-RUN apk add  --no-cache ffmpeg
+RUN apk update
 
+RUN apk add  --no-cache ffmpeg
+RUN apk add --no-cache g++ make python3 postgresql-libs libpq-dev
 ENV NODE_ENV=production
 ENV GPU_TRANSCODING=FALSE
 

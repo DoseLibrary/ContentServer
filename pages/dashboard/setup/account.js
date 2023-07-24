@@ -103,7 +103,6 @@ export default class Register extends Component {
             })
             .catch(err => {
                 this.setState({ statusMessage: err.message });
-                console.log(err);
             });
         }
         return false;

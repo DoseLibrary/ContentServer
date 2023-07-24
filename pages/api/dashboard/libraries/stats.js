@@ -7,7 +7,6 @@ const cors = require('../../../../lib/cors');
 const GetStats = (req, res) => {
     const libtype = req.query.libtype
     const id = req.query.id
-    console.log(req.query)
     return new Promise(resolve => {
         res = cors(res);
         if (!validateUser(req, process.env.DASHBOARD_SECRET)) {
@@ -18,7 +17,6 @@ const GetStats = (req, res) => {
         //if (typeof id != Number) {
           //  res.status(403).end();
         //}
-        console.log(libtype)
         let query = "";
 
         if (libtype == "MOVIES") {
@@ -29,7 +27,6 @@ const GetStats = (req, res) => {
         if (libtype == "SERIES") {
             query = `SELECT COUNT(*) FROM serie where library=${id}`;
         }
-        console.log(query)
 
         if (query == "") {
             res.status(403).end();
@@ -40,7 +37,6 @@ const GetStats = (req, res) => {
 
         db.any(query)
         .then(data => {
-            console.log(data)
             res.status(200).json({'count': data[0].count});
             resolve();
         });

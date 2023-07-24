@@ -29,9 +29,11 @@ const removeUserFromMainServer = (mainServerUrl, serverName, username) => {
                     username: username
                 })
             }).then(res => res.json()).then(result => {
+
                 if (result.success) {
                     resolve();
                 } else {
+                    console.log(result.error)
                     reject({
                         error: result.error,
                         code: result.code

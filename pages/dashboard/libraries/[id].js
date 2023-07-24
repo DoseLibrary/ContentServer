@@ -36,7 +36,6 @@ export default withRouter(class Libraries extends Component {
                     'Authorization': `Bearer ${token}`
                 },
             }).then(res => res.json()).then(data => {
-                console.log(data)
                 this.setState({
                     data: data.result
                 });

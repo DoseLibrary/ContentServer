@@ -49,7 +49,6 @@ export default class Libraries extends Component {
     }
 
     libraryError(error) {
-        console.log(`Library error: `, error);
         if (error === 400) {
             this.setState({ error: 'Access denied' });
         } else {
@@ -137,7 +136,6 @@ export default class Libraries extends Component {
                     }
                 })
                 .catch(error => {
-                    console.log(error);
                     this.libraryError(error);
                 });
             }

@@ -41,7 +41,6 @@ export default (req, res) => {
             nextOffset: parseInt(offset)+parseInt(limit),
             next: `/api/dashboard/libraries/getItems?limit=${limit}&offset=${parseInt(offset)+parseInt(limit)}`
         }
-        console.log(response)
         res.status(200).json(response);
         resolve();
     });

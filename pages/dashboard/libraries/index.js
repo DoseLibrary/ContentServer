@@ -58,7 +58,6 @@ export default class Libraries extends Component {
     getLibraryElementList () {
         let elementList = [];
         for (let lib of this.state.libraries) {
-            console.log(lib)
             elementList.push(
                 <div className={Styles.card} key={lib.id} onClick={() => window.location.href = "/dashboard/libraries/" + lib.id + "?name=Test"}>
                     <div className={Styles.cardHeader}>
