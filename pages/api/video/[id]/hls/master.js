@@ -128,7 +128,8 @@ const getSubtitleStreams = (id, subtitles, type, token) => {
 }
 
 export default async (req, res) => {
-    const { id, audioStream, type } = req.query;
+    // TODO: Remove token from here, make the m3u8 links work without token in the GET parameters
+    const { id, audioStream, type, token } = req.query;
     
     if (!validateUser(req)) {
         res.status(403).end();
