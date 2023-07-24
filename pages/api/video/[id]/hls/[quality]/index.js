@@ -10,7 +10,8 @@ const logger = new Logger();
 const segmentDur = Transcoding.SEGMENT_DURATION; //  Controls the duration (in seconds) that the file will be chopped into.
 
 export default async (req, res) => {
-    const { id, quality, duration, group, audioStream, type } = req.query;
+    // TODO: Remove token from here, make the m3u8 links work without token in the GET parameters
+    const { id, quality, duration, group, audioStream, type, token } = req.query;
 
     if (!validateUser(req, process.env.SECRET, 10800)) {
         res.status(403).end();
