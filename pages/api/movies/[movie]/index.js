@@ -15,8 +15,7 @@ export default (req, res) => {
   return new Promise(resolve => {
         res = cors(res);
         let movieID = req.query.movie;
-        let token = req.query.token;
-        let decoded = validateUser(token)
+        let decoded = validateUser(req)
 
         if (!decoded) {
             res.status(403).end();

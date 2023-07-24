@@ -11,8 +11,7 @@ export default (req, res) => {
         let type = req.query.type;
         let id = req.query.id;
 
-        let token = req.query.token;
-        if (!validateUser(token)) {
+        if (!validateUser(req)) {
             res.status(403).end();
             resolve();
             return;
@@ -32,7 +31,6 @@ export default (req, res) => {
         if (type === 'movie') {
             getFileHash(path)
             .then(info => {
-                console.log(path);
                 OpenSubtitles.search({
                     sublanguageid: 'eng',
                     hash: info.moviehash,
@@ -40,8 +38,6 @@ export default (req, res) => {
                     path: path,
                     filename: pathLib.basename(path),
                     extensions: ['srt', 'vtt']
-                }).then(subtitles => {
-                    console.log(subtitles);
                 })
             });
         }

@@ -16,9 +16,8 @@ const ORDERBY = [
 export default (req, res) => {
   return new Promise(async (resolve) => {
       res = cors(res);
-      let token = req.query.token;
       const needTrailer = req.query.trailer == "true";
-      if (!validateUser(token)) {
+      if (!validateUser(req)) {
           res.status(403).end();
           resolve();
           return;

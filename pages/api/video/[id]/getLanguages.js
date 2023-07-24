@@ -18,8 +18,7 @@ export default (req, res) => {
         res.setHeader('Access-Control-Allow-Origin', "*");
         res.setHeader('Access-Control-Allow-Headers', "*");
 
-        let token = req.query.token;
-        if (!validateUser(token)) {
+        if (!validateUser(req)) {
             res.status(403).end();
             resolve();
             return;

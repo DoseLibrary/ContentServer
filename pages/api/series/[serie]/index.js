@@ -14,8 +14,7 @@ export default (req, res) => {
         res = cors(res);
         let serieID = req.query.serie;
 
-        let token = req.query.token;
-        if (!validateUser(token)) {
+        if (!validateUser(req)) {
             res.status(403).end();
             resolve();
             return;

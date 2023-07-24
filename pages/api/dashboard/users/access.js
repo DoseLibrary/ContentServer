@@ -8,11 +8,11 @@ const SetUserAccess = (req, res) => {
             res.status(405).send({ message: 'Only POST requests allowed' })
             return
         }
-        const { token, id, access } = req.body;
+        const { id, access } = req.body;
         const setValue = access ? true : false; // Convert to boolean if weird data was sent in
         res = cors(res);
 
-        if (!validateUser(token, process.env.DASHBOARD_SECRET)) {
+        if (!validateUser(req, process.env.DASHBOARD_SECRET)) {
             res.status(403).end();
             return;
         }

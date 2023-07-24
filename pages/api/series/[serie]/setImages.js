@@ -11,8 +11,7 @@ export default (req, res) => {
         let backdrop = req.query.backdrop;
         res = cors(res);
 
-        let token = req.query.token;
-        if (!validateUser(token)) {
+        if (!validateUser(req)) {
             res.status(403).end();
             resolve();
             return;

@@ -76,9 +76,9 @@ const getSegment = async (req, res) => {
   // req.params = the GET parameters from the folder structure
   const { id, quality, segment } = req.params;
   // req.query = the GET parameters from the URL (after the ? in the URL)
-  const { group, audioStream, type, token } = req.query;
+  const { group, audioStream, type } = req.query;
 
-  let user = validateUser(token, process.env.SECRET, 10800); // 3 hours
+  let user = validateUser(req, process.env.SECRET, 10800); // 3 hours
   if (!user) {
     res.status(403).end();
     return;

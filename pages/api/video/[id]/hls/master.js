@@ -128,9 +128,9 @@ const getSubtitleStreams = (id, subtitles, type, token) => {
 }
 
 export default async (req, res) => {
-    const { id, audioStream, type, token } = req.query;
+    const { id, audioStream, type } = req.query;
     
-    if (!validateUser(token)) {
+    if (!validateUser(req)) {
         res.status(403).end();
         return;
     }

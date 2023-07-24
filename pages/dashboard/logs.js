@@ -26,7 +26,6 @@ export default class Index extends Component {
             fetch(`${this.host}/api/dashboard/getLogs?token=${token}&group=all&date=Mon.Apr.10.2023`)
             .then(res => res.text())
             .then(data => {
-                console.log(data)
                 //this.logText = data;
                 this.setState({logText: data});
             });

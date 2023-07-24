@@ -14,8 +14,7 @@ const GetImages = (req, res) => {
         let movieID = req.query.movie;
         res = cors(res);
 
-        let token = req.query.token;
-        if (!validateUser(token)) {
+        if (!validateUser(req)) {
             res.status(403).end();
             resolve();
             return;

@@ -13,9 +13,8 @@ const GetRecommended = (req, res) => {
     return new Promise(resolve => {
         res = cors(res);
 
-        let token = req.query.token;
         let movieID = req.query.movie;
-        if (!validateUser(token)) {
+        if (!validateUser(req)) {
             res.status(403).end();
             resolve();
             return;

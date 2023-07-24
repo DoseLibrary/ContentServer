@@ -15,8 +15,7 @@ export default (req, res) => {
         let orderBy = req.query.orderby ? req.query.orderby : 'id';
         let offset = req.query.offset ? req.query.offset : '0';
         let limit = req.query.limit ? req.query.limit : '20';
-        let token = req.query.token;
-        let decoded = validateUser(token)
+        let decoded = validateUser(req)
 
         if (!decoded) {
             res.status(403).end();
