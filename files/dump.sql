@@ -526,3 +526,7 @@ create table general
     main_server_ip text not null
 );
 
+CREATE TABLE settings (
+    h265 boolean DEFAULT true NOT NULL
+);
+INSERT INTO settings VALUES (true);

@@ -23,6 +23,7 @@ const useUserAgent = require('next-useragent');
 
 
 var express = require('express');
+const Settings = require('../../../../../../../lib/settings');
 var router = express.Router();
 
 const waitUntilFileExists = (filePath, requestedSegment, hlsManager, group) => {
@@ -149,7 +150,13 @@ const getSegment = async (req, res) => {
       if (restartTranscoding) {
         const hdrData = await content.getHdrData();
         const audioSupported = browser.audioCodecSupported(codecInfo.codec);
+        const settings = new Settings();
+        const h265Enabled = await settings.ish265Enabled();
         const h265Supported = browser.videoCodecSupported('h265');
+        if (h265Supported && !h265Enabled) {
+          logger.DEBUG('H265 is supported by the client, but disabled on the server. Using h264');
+        }
+
         promises.push(hlsManager.startTranscoding(
           content,
           quality,
@@ -158,7 +165,7 @@ const getSegment = async (req, res) => {
           audioStream,
           audioSupported,
           hdrData,
-          h265Supported,
+          h265Supported && h265Enabled,
           user
         ));
       }
