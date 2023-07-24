@@ -29,9 +29,11 @@ const removeUserFromMainServer = (mainServerUrl, serverName, username) => {
                     username: username
                 })
             }).then(res => res.json()).then(result => {
+
                 if (result.success) {
                     resolve();
                 } else {
+                    console.log(result.error)
                     reject({
                         error: result.error,
                         code: result.code
@@ -48,9 +50,9 @@ const removeUserFromMainServer = (mainServerUrl, serverName, username) => {
 }
 const DeleteUser = async (req, res) => {
     res = cors(res);
-    const { token, id, username } = req.body;
+    const { id, username } = req.body;
 
-    if (!validateUser(token, process.env.DASHBOARD_SECRET)) {
+    if (!validateUser(req, process.env.DASHBOARD_SECRET)) {
         res.status(403).end();
         return;
     }

@@ -5,8 +5,8 @@ const Logger = require('../../../../lib/logger');
 const logger = new Logger();
 
 const CreateAdmin = (req, res) => {
-    const { username, password, token } = req.body;
-    if (!validateUser(token, process.env.DASHBOARD_SECRET)) {
+    const { username, password } = req.body;
+    if (!validateUser(req, process.env.DASHBOARD_SECRET)) {
         res.status(403).json({
             success: false,
             error: 'Invalid token'

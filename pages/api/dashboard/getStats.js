@@ -6,8 +6,7 @@ const GetStats = (req, res) => {
     return new Promise(resolve => {
         res = cors(res);
 
-        const token = req.query.token;
-        if (!validateUser(token, process.env.DASHBOARD_SECRET)) {
+        if (!validateUser(req, process.env.DASHBOARD_SECRET)) {
             res.status(403).end();
             return;
         }
@@ -21,7 +20,6 @@ const GetStats = (req, res) => {
             db.one(`SELECT COUNT(*) FROM serie`).then(series => {
                 db.one(`SELECT COUNT(*) FROM serie_episode`).then(episodes => {
                     db.one(`SELECT COUNT(*) FROM users`).then(users => {
-                        console.log(users)
                         response.showCount = series.count;
                         response.episodeCount = episodes.count;
                         response.userCount = users.count;

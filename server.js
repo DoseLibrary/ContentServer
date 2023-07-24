@@ -27,7 +27,6 @@ console.log(`
 #     # #    # #    # #      
 ######   ####   ####  ######  \n`);
 
-console.log(port)
 const server = new Server(port, dev);
 
 if (process.env.TEST === 'TRUE') {

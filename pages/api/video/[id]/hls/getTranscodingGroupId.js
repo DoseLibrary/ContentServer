@@ -3,9 +3,9 @@ import HlsManager from '../../../../../lib/hls/HlsManager';
 const validateUser = require('../../../../../lib/validateUser');
 
 export default async (req, res) => {
-    const { id, token } = req.query;
+    const { id } = req.query;
     const hlsManager = new HlsManager();
-    let decoded = validateUser(token);
+    let decoded = validateUser(req);
     if (!decoded) {
         res.status(403).end();
         resolve();

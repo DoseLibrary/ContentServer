@@ -32,9 +32,8 @@ export default (req, res) => {
 
         let time = Math.floor(parseInt(req.query.time));
         let videoDuration = Math.floor(parseInt(req.query.videoDuration));
-        let token = req.query.token;
         let type = req.query.type;
-        let decoded = validateUser(token);
+        let decoded = validateUser(req);
     
         if (!decoded) {
             res.status(403).end();

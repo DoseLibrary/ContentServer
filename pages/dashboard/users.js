@@ -165,7 +165,7 @@ export default class Register extends Component {
 
     getAdminList() {
         validateDashboardAccess().then(token => {
-            fetch(`${this.host}/api/dashboard/admin/getList?token=${token}`).then(res => res.json())
+            fetch(`/api/dashboard/admin/getList?token=${token}`).then(res => res.json())
                 .then(data => {
                     this.setState({
                         admins: data
@@ -176,7 +176,7 @@ export default class Register extends Component {
 
     getUserList() {
         validateDashboardAccess().then(token => {
-            fetch(`${this.host}/api/dashboard/users/get?token=${token}`).then(res => res.json()).then(data => {
+            fetch(`/api/dashboard/users/get?token=${token}`).then(res => res.json()).then(data => {
                 this.setState({
                     users: data
                 });
@@ -186,7 +186,7 @@ export default class Register extends Component {
 
     createUser() {
         validateDashboardAccess().then(token => {
-            fetch(`${this.host}/api/dashboard/users/create`, {
+            fetch(`/api/dashboard/users/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -212,7 +212,7 @@ export default class Register extends Component {
 
     createAdmin() {
         validateDashboardAccess().then(token => {
-            fetch(`${this.host}/api/dashboard/admin/create`, {
+            fetch(`/api/dashboard/admin/create`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -240,7 +240,7 @@ export default class Register extends Component {
 
     deleteAdmin(id) {
         validateDashboardAccess().then(token => {
-            fetch(`${this.host}/api/dashboard/admin/delete?token=${token}&id=${id}`).then(response => {
+            fetch(`/api/dashboard/admin/delete?token=${token}&id=${id}`).then(response => {
                 if (response.status === 200) {
                     this.setState({
                         statusMessage: ''
@@ -257,7 +257,7 @@ export default class Register extends Component {
 
     deleteUser(id, username) {
         validateDashboardAccess().then(token => {
-            fetch(`${this.host}/api/dashboard/users/delete`, {
+            fetch(`/api/dashboard/users/delete`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -275,7 +275,7 @@ export default class Register extends Component {
 
     setAccess(id, access) {
         validateDashboardAccess().then(token => {
-            fetch(`${this.host}/api/dashboard/users/access`, {
+            fetch(`/api/dashboard/users/access`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -298,7 +298,6 @@ export default class Register extends Component {
                 username: value
             }
         }));
-        console.log(this.state.createUser.username);
     }
 
     render() {

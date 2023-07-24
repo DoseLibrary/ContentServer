@@ -59,11 +59,9 @@ export default class Register extends Component {
             } else {
                 this.setState({ statusMessage: `Error: ${result.message}`});
             }
-            console.log(result);
         })
         .catch(err => {
             this.setState({ statusMessage: err.message });
-            console.log(err);
         });
         return false;
     }

@@ -7,8 +7,8 @@ const validateUser = require('../../../../lib/validateUser');
 
 const DeleteAdmin = (req, res) => {
     res = cors(res);
-    const { token, id } = req.query;
-    const user = validateUser(token, process.env.DASHBOARD_SECRET);
+    const { id } = req.query;
+    const user = validateUser(req, process.env.DASHBOARD_SECRET);
     if (!user) {
         res.status(403).end();
         return;

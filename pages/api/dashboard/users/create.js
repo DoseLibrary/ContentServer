@@ -49,8 +49,8 @@ const getGeneralInfo = () => {
 
 
 const CreateUser = (req, res) => {
-    const { username, token } = req.body;
-    if (!validateUser(token, process.env.DASHBOARD_SECRET)) {
+    const { username } = req.body;
+    if (!validateUser(req, process.env.DASHBOARD_SECRET)) {
         res.status(403).json({
             success: false,
             error: 'Invalid token'
