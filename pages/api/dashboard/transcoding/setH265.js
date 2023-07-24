@@ -1,11 +1,11 @@
 import Logger from '../../../../lib/logger';
-import validateUserByHeader from '../../../../lib/validateUserByHeader';
+import validateUser from '../../../../lib/validateUser';
 
 const logger = new Logger();
 const db = require('../../../../lib/db');
 
 const SetH265 = async (req, res) => {
-    if (!validateUserByHeader(req, process.env.DASHBOARD_SECRET)) {
+    if (!validateUser(req, process.env.DASHBOARD_SECRET)) {
         res.status(403).end();
         return;
     }

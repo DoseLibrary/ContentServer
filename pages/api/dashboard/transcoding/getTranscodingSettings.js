@@ -1,9 +1,9 @@
-import validateUserByHeader from "../../../../lib/validateUserByHeader";
+import validateUser from "../../../../lib/validateUser";
 
 const Settings = require("../../../../lib/settings");
 
 const GetTranscodingSettings = async (req, res) =>{
-    if (!validateUserByHeader(req, process.env.DASHBOARD_SECRET)) {
+    if (!validateUser(req, process.env.DASHBOARD_SECRET)) {
         res.status(403).end();
         return;
     }

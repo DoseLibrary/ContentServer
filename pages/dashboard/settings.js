@@ -24,7 +24,7 @@ export default class Setting extends Component {
         validateDashboardAccess().then( async (token) => {
             fetch('/api/dashboard/transcoding/getTranscodingSettings', {
                 headers: {
-                    'Authentication': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`
                 }
             })
             .then(res => res.json())
@@ -42,7 +42,7 @@ export default class Setting extends Component {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authentication': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     enabled
@@ -68,7 +68,7 @@ export default class Setting extends Component {
                 <br/>
                 <CenteredContainer title="Transcodings">
                     <input onChange={this.h265Changed} checked={this.state.h265Enabled} type="checkbox" className={styles.h265} name="h265" id="h265" />
-                    <label for="h265">Enable h265</label>
+                    <label htmlFor="h265">Enable h265</label>
                     <p className={styles.small}><i>If h265 encoding should be used for supported clients. This also adds support for HDR transcodings.</i></p>
                 </CenteredContainer>
             </Layout>
