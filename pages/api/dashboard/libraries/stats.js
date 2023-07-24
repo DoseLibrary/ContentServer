@@ -20,12 +20,12 @@ const GetStats = (req, res) => {
         let query = "";
 
         if (libtype == "MOVIES") {
-            query = `SELECT COUNT(*) FROM movie where library=${id}`;
+            query = `SELECT COUNT(*) FROM movie where library=$1`;
         }
 
         
         if (libtype == "SERIES") {
-            query = `SELECT COUNT(*) FROM serie where library=${id}`;
+            query = `SELECT COUNT(*) FROM serie where library=$1`;
         }
 
         if (query == "") {
@@ -35,7 +35,7 @@ const GetStats = (req, res) => {
 
 
 
-        db.any(query)
+        db.any(query, [id])
         .then(data => {
             res.status(200).json({'count': data[0].count});
             resolve();
