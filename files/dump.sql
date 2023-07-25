@@ -527,6 +527,15 @@ create table general
 );
 
 CREATE TABLE settings (
-    h265 boolean DEFAULT true NOT NULL
+    h265 boolean DEFAULT true NOT NULL,
+    h265_crf integer DEFAULT 28 NOT NULL,
+    h264_crf integer DEFAULT 22 NOT NULL,
+    h265_preset text NOT NULL,
+    h264_preset text NOT NULL,
+    h265_threads integer DEFAULT 4 NOT NULL,
+    h264_threads integer DEFAULT 4 NOT NULL
 );
-INSERT INTO settings VALUES (true);
+
+
+
+INSERT INTO settings VALUES (true, 28, 22, ultrafast, ultrafast, 4, 4);

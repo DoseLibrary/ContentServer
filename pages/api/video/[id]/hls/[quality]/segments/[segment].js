@@ -149,7 +149,6 @@ const getSegment = async (req, res) => {
 
       if (restartTranscoding) {
         const hdrData = await content.getHdrData();
-        const audioSupported = browser.audioCodecSupported(codecInfo.codec);
         const settings = new Settings();
         const h265Enabled = await settings.ish265Enabled();
         const h265Supported = browser.videoCodecSupported('h265');
@@ -163,7 +162,6 @@ const getSegment = async (req, res) => {
           startSegment,
           group,
           audioStream,
-          audioSupported,
           hdrData,
           h265Supported && h265Enabled,
           user
