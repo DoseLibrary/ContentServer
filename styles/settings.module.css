@@ -5,3 +5,27 @@
 .h265 {
     margin-right: 5px;
 }
+
+.halfBox {
+    flex: 1;
+}
+
+.flexBox {
+    display: inline-flex;
+    width: 100%;
+}
+
+.label {
+    margin-left: 10px;
+    font-size: 14px;
+}
+
+.input {
+    border-radius: 8px;
+}
+
+.button {
+    border-radius: 5px;
+    background-color: whitesmoke;
+    border: none;
+}

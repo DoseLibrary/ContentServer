@@ -10,8 +10,10 @@ const GetTranscodingSettings = async (req, res) =>{
 
     const settings = new Settings();
     const h265Enabled = await settings.ish265Enabled();
+    const h265Settings = await settings.getH265Settings();
+    const h264Settings = await settings.getH264Settings();
 
-    res.status(200).json({ h265Enabled });
+    res.status(200).json({ h265Enabled, h265Settings, h264Settings });
 }
 
 export default GetTranscodingSettings;
