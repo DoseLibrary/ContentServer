@@ -538,4 +538,4 @@ CREATE TABLE settings (
 
 
 
-INSERT INTO settings VALUES (true, 28, 22, ultrafast, ultrafast, 4, 4);
+INSERT INTO settings VALUES (true, 28, 22, 'ultrafast', 'ultrafast', 4, 4);
