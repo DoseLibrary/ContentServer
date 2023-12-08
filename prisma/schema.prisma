@@ -1,0 +1,238 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum LibraryType {
+  MOVIE
+  SHOW
+}
+
+enum ImageType {
+  BACKDROP
+  POSTER
+  LOGO
+}
+
+enum ImageSource {
+  TMDB
+  INTERNAL
+}
+
+model Library {
+  id    Int         @id @default(autoincrement())
+  type  LibraryType
+  name  String
+  path  String
+  Movie Movie[]
+  Show  Show[]
+}
+
+model Subtitle {
+  id        Int      @id @default(autoincrement())
+  path      String   @unique
+  language  String
+  movieId   Int?
+  movie     Movie?   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  episodeId Int?
+  episode   Episode? @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+}
+
+model User {
+  id              Int              @id @default(autoincrement())
+  username        String
+  hasAccess       Boolean          @default(false)
+  ongoingMovies   OngoingMovie[]
+  ongoingEpisodes OngoingEpisode[]
+  movieWatchlist  Movie[]
+  watchedMovies   Movie[]          @relation("WatchedMovies")
+}
+
+model OngoingEpisode {
+  user          User     @relation(fields: [userId], references: [id])
+  userId        Int
+  episode       Episode  @relation(fields: [showId, seasonNumber, episodeNumber], references: [showId, seasonNumber, episodeNumber])
+  showId        Int
+  seasonNumber  Int
+  episodeNumber Int
+  time          Int
+  lastWatched   DateTime
+
+  @@id([userId, showId, seasonNumber, episodeNumber])
+}
+
+model OngoingMovie {
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movie       Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  userId      Int
+  movieId     Int
+  time        Int
+  lastWatched DateTime
+
+  @@id([userId, movieId])
+}
+
+model Show {
+  id           Int           @id @default(autoincrement())
+  addedDate    DateTime
+  name         String
+  path         String
+  libraryId    Int
+  library      Library       @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  showMetadata ShowMetadata?
+  seasons      Season[]
+}
+
+model ShowMetadata {
+  showId       Int      @id
+  show         Show     @relation(fields: [showId], references: [id], onDelete: Cascade)
+  title        String
+  overview     String
+  firstAirDate DateTime
+  popularity   Int
+  externalId   Int
+  genres       Genre[]
+  images       Image[]
+}
+
+model Season {
+  showId         Int
+  addedDate      DateTime
+  show           Show            @relation(fields: [showId], references: [id], onDelete: Cascade)
+  seasonNumber   Int
+  path           String
+  seasonMetadata SeasonMetadata?
+  episodes       Episode[]
+
+  @@id([showId, seasonNumber])
+}
+
+model SeasonMetadata {
+  id           Int      @id @default(autoincrement())
+  season       Season   @relation(fields: [showId, seasonNumber], references: [showId, seasonNumber], onDelete: Cascade)
+  name         String
+  airDate      DateTime
+  overview     String
+  showId       Int
+  seasonNumber Int
+  images       Image[]
+
+  @@unique([showId, seasonNumber])
+}
+
+model Episode {
+  id            Int              @unique @default(autoincrement()) // Should this be @id instead?
+  season        Season           @relation(fields: [showId, seasonNumber], references: [showId, seasonNumber], onDelete: Cascade)
+  addedDate     DateTime
+  showId        Int
+  seasonNumber  Int
+  episodeNumber Int
+  path          String
+  duration      Int?
+  metadata      EpisodeMetadata?
+  usersWatching OngoingEpisode[]
+  subtitles     Subtitle[]
+
+  @@id([showId, seasonNumber, episodeNumber])
+}
+
+model EpisodeMetadata {
+  id            Int      @id @default(autoincrement())
+  episode       Episode  @relation(fields: [showId, seasonNumber, episodeNumber], references: [showId, seasonNumber, episodeNumber], onDelete: Cascade)
+  showId        Int
+  seasonNumber  Int
+  episodeNumber Int
+  airDate       DateTime
+  name          String
+  overview      String
+  voteAverage   Int
+  images        Image[]
+
+  @@unique([showId, seasonNumber, episodeNumber])
+}
+
+model Movie {
+  id             Int            @id @default(autoincrement())
+  addedDate      DateTime
+  name           String
+  directory      String
+  file           String
+  duration       Int?
+  trailerPath    String?
+  libraryId      Int
+  library        Library        @relation(fields: [libraryId], references: [id], onDelete: Cascade)
+  movieMetadata  MovieMetadata?
+  usersWatching  OngoingMovie[]
+  usersWatchlist User[]
+  watchedBy      User[]         @relation("WatchedMovies")
+  subtitles      Subtitle[]
+}
+
+model MovieMetadata {
+  movieId                 Int                   @id
+  title                   String
+  overview                String
+  releaseDate             DateTime
+  externalId              Int
+  popular                 Boolean               @default(false)
+  movie                   Movie                 @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  genres                  Genre[]
+  // Below is a many-to-many self-relation. One Movie(metadata) can have many movie(metadata) as recommended
+  // The second "recommendationsRelation" is an extra field that can be ignored
+  recommendations         MovieRecommendation[] @relation("MovieRecommendation")
+  recommendationsRelation MovieRecommendation[] @relation("MovieRecommendationRelation")
+  images                  Image[]
+  characters              MovieCharacter[]
+}
+
+model MovieCharacter {
+  movie         MovieMetadata @relation(fields: [movieId], references: [movieId], onDelete: Cascade)
+  actorId       Int
+  actor         Actor         @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  name          String
+  orderInCredit Int
+  movieId       Int
+
+  @@id([actorId, movieId])
+}
+
+model Actor {
+  id             Int              @id
+  name           String
+  image          Image?           @relation(fields: [imageId], references: [id])
+  imageId        Int?
+  MovieCharacter MovieCharacter[]
+}
+
+model Image {
+  id              Int               @id @default(autoincrement())
+  type            ImageType
+  preferred       Boolean
+  path            String
+  source          ImageSource       @default(INTERNAL)
+  ShowMetadata    ShowMetadata[]
+  SeasonMetadata  SeasonMetadata[]
+  EpisodeMetadata EpisodeMetadata[]
+  MovieMetadata   MovieMetadata[]
+  Actor           Actor[]
+}
+
+model Genre {
+  name          String          @id
+  movieMetadata MovieMetadata[]
+  ShowMetadata  ShowMetadata[]
+}
+
+model MovieRecommendation {
+  movieMetadataA MovieMetadata @relation("MovieRecommendation", fields: [movieIdA], references: [movieId], onDelete: Cascade)
+  movieIdA       Int
+  MovieMetadataB MovieMetadata @relation("MovieRecommendationRelation", fields: [movieIdB], references: [movieId], onDelete: Cascade)
+  movieIdB       Int
+  priority       Int
+
+  @@id([movieIdA, movieIdB])
+}

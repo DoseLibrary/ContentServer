@@ -1,0 +1,30 @@
+{
+    "mainServer": "http://localhost:3000",
+    "database": {
+        "host": "localhost",
+        "password": "admin",
+        "port": "5432",
+        "user": "postgres",
+        "name": "DoseContentServer"
+    },
+    "transcoding": {
+        "directory": "/home/gustav/code/Dose/temp",
+        "h265": {
+            "crf": 22,
+            "preset": "ultrafast",
+            "threads": 8
+        },
+        "h264": {
+            "crf": 22,
+            "preset": "ultrafast",
+            "threads": 8
+        },
+        "h264_nvenc": {
+            "crf": 22,
+            "preset": "ultrafast",
+            "threads": 8
+        },
+        "primaryVideoCodec": "h264",
+        "secondaryVideoCodec": "h265"
+    }
+}
