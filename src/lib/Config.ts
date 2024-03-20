@@ -12,6 +12,7 @@ interface ConfigData {
     user: string;
     name: string; // database name
   };
+  setupComplete: boolean;
   transcoding: {
     directory: string;
     h265: TranscodingSettings;
@@ -53,6 +54,10 @@ export class Config {
     return this.data.transcoding;
   }
 
+  public get setupComplete() {
+    return this.data.setupComplete;
+  }
+
   private createConfigFile(filePath: string) {
     const tmpPath = path.join(os.tmpdir(), 'Dose');
     const defaultTranscodingPath = path.join(tmpPath, 'transcodings');
@@ -64,6 +69,7 @@ export class Config {
 
     const data: ConfigData = {
       mainServer: '',
+      setupComplete: false,
       database: {
         host: '',
         password: '',

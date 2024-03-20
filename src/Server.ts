@@ -27,6 +27,7 @@ import { createMetadataEndpoints } from './endpoints/metadata';
 import { createShowEndpoints } from './endpoints/show';
 import { ExtractSubtitlesJob } from './lib/job/ExtractSubtitlesJob';
 import { createSearchEndpoints } from './endpoints/search';
+import { createDashboardEndpoints } from './endpoints/setup';
 
 export class Server {
   private app: Express;
@@ -53,7 +54,7 @@ export class Server {
     this.watcher = new Watcher(this.repository);
   }
 
-  private setupEndpoints() {
+  private initializePublicAPIEndpoints() {
     const endpoints: RouterPath[] = [
       createPingEndpoints(this.config, this.emitter, this.repository),
       createImageEndpoints(this.config, this.emitter, this.repository),
@@ -71,6 +72,17 @@ export class Server {
     const apiRouter = Router();
     endpoints.forEach(({ router, path }) => apiRouter.use(path, router));
     this.app.use('/api', apiRouter);
+  }
+
+
+  private initializeSetupAPIEndpoints() {
+    console.log('init debug');
+    const dashboardEndpoints: RouterPath[] = [
+      createDashboardEndpoints(this.config, this.emitter, this.repository)
+    ];
+    const dashboardRouter = Router();
+    dashboardEndpoints.forEach(({ router, path }) => dashboardRouter.use(path, router));
+    this.app.use('/api/setup', dashboardRouter);
   }
 
   private setupMiddlewares() {
@@ -113,10 +125,15 @@ export class Server {
   }
 
   async start(port: number) {
-    this.setupEndpoints();
+    if (this.config.setupComplete) {
+      this.initializePublicAPIEndpoints();
+      this.watcher.start(this.emitter);
+      this.setupJobs();
+    } else {
+      this.initializeSetupAPIEndpoints();
+    }
     this.setupErrorHandling();
+
     this.server.listen(port);
-    this.watcher.start(this.emitter);
-    this.setupJobs();
   }
 }

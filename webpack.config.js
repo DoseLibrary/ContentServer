@@ -21,18 +21,19 @@ module.exports = {
         type: 'asset/resource',
       },
       {
-        test: /\.tsx?$/,
+        test: /\.ts?$/,
         use: 'ts-loader',
-        exclude: /node_modules/,
+        exclude: [
+          /node_modules/,
+        ],
       }
     ],
   },
   resolve: {
-    extensions: ['.tsx', '.ts', '.js', '.sql'],
+    extensions: ['.ts', '.js', '.sql'],
   },
   output: {
     filename: '[name].bundle.js',
-    path: path.resolve(__dirname, 'dist'),
   },
   plugins: [
     new CopyWebpackPlugin({
