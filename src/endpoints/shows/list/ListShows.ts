@@ -2,10 +2,9 @@ import { EventEmitter } from 'events';
 import { ValidationChain, query } from "express-validator";
 import { GetEndpoint } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
-import { RepositoryManager } from '../../../lib/repository';
-import { ImageType } from '@prisma/client';
-import { ShowResponse } from '../types/ShowResponse';
-import { ShowOrderBy, ShowOrderByOptions, listShowsWithMetadata, normalizeShows } from '../../../lib/queries/showQueries';
+import { normalizeBasicShows, ShowOrderBy, ShowOrderByOptions } from '../../../lib/queries/showQueries';
+import { ShowRepository } from '../../../repositories/ShowRepository';
+import { BasicShowResponse } from '../../../types/show/BasicShowResponse';
 
 interface QueryParams {
   orderBy: ShowOrderBy;
@@ -14,8 +13,8 @@ interface QueryParams {
 }
 
 export class ListShowsEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/list', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/list', emitter);
     this.setAuthRequired(false);
   }
 
@@ -26,13 +25,20 @@ export class ListShowsEndpoint extends GetEndpoint {
       query('offset', 'How many records to skip').default(0).isInt({ min: 0 }).toInt()
     ]
   }
-  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<ShowResponse[]> {
+  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<BasicShowResponse[]> {
     const { limit, offset } = data.query;
     const orderBy: ShowOrderByOptions = {
       field: data.query.orderBy,
       dir: 'desc'
     }
-    const shows = await listShowsWithMetadata(this.repository, orderBy, limit, offset);
-    return normalizeShows(shows);
+
+    const shows = await ShowRepository.find({
+      take: limit,
+      skip: offset,
+      order: {
+        [orderBy.field]: orderBy.dir
+      }
+    });
+    return normalizeBasicShows(shows);
   }
 }

@@ -2,7 +2,6 @@ import { EventEmitter } from "events";
 import { ValidationChain, query } from "express-validator";
 import { GetEndpoint } from "../../lib/Endpoint";
 import { RequestData } from "../../types/RequestData";
-import { RepositoryManager } from "../../lib/repository";
 import { TmdbMetadataClient } from "../../lib/api/tmdb/TmdbMetadataClient";
 import { MetadataClient, MinifiedMovieMetadata } from "../../lib/api/MetadataClient";
 
@@ -13,8 +12,8 @@ interface Query {
 export class SearchForMovieMetadataEndpoint extends GetEndpoint {
   private metadataClient: MetadataClient;
 
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/movie/search', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/movie/search', emitter);
     this.metadataClient = new TmdbMetadataClient('19065a8218d4c104a51afcc3e2a9b971');
     this.setAuthRequired(false);
   }
@@ -27,5 +26,4 @@ export class SearchForMovieMetadataEndpoint extends GetEndpoint {
   protected execute(data: RequestData<unknown, Query, unknown>): Promise<MinifiedMovieMetadata[]> {
     return this.metadataClient.searchMovieMetadata(data.query.query);
   }
-
 }

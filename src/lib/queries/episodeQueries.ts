@@ -1,49 +1,8 @@
-import { ImageType, Prisma } from "@prisma/client";
-import { RepositoryManager } from "../repository";
-import { EpisodeResponse } from "../../endpoints/shows/types/EpisodeResponse";
 import { cleanDate } from "../../util/date";
-import path from 'path';
-
-export const episodeWithMetadataQuery = {
-  metadata: {
-    include: {
-      images: {
-        select: {
-          id: true,
-          type: true
-        }
-      }
-    }
-  },
-  season: {
-    include: {
-      seasonMetadata: {
-        include: {
-          images: {
-            select: {
-              id: true,
-              type: true
-            }
-          }
-        }
-      },
-      show: {
-        include: {
-          showMetadata: {
-            include: {
-              images: {
-                select: {
-                  id: true,
-                  type: true
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
+import { Episode } from "../../models/Episode";
+import { ImageType } from "../../models/Image";
+import { BasicEpisodeResponse } from "../../types/episode/BasicEpisodeResponse";
+import { DetailedEpisodeResponse } from "../../types/episode/DetailedEpisodeResponse";
 
 enum EpisodeOrderBy {
   ADDED_DATE = 'addedDate',
@@ -55,117 +14,46 @@ export interface EpisodeOrderByOptions {
   dir: 'asc' | 'desc'
 }
 
-const createOrderBy = (data?: EpisodeOrderByOptions): Prisma.EpisodeOrderByWithRelationInput | undefined => {
-  switch (data?.field) {
-    case EpisodeOrderBy.ADDED_DATE:
-      return {
-        addedDate: data.dir
-      }
-    case EpisodeOrderBy.RELEASE_DATE:
-      return {
-        metadata: {
-          airDate: data.dir
-        }
-      }
-  }
-}
-
-export const listEpisodesWithMetadata = (
-  repository: RepositoryManager,
-  orderBy?: EpisodeOrderByOptions,
-  limit?: number,
-  offset?: number
-) => {
-  return repository.episode.list(
-    {
-      include: episodeWithMetadataQuery,
-      orderBy: createOrderBy(orderBy)
-    },
-    limit,
-    offset
-  );
-}
-
-export const getEpisodeWithMetadata = (
-  repository: RepositoryManager,
-  showId: number,
-  seasonNumber: number,
-  episodeNumber: number
-) => {
-  return repository.episode.findByEpisodeInSeason(
-    episodeNumber,
-    seasonNumber,
-    showId,
-    {
-      include: episodeWithMetadataQuery
-    }
-  );
-}
-
-export const getEpisodePathById = (repository: RepositoryManager, id: number) => {
-  return repository.episode.findById(id, {
-    include: {
-      season: {
-        select: {
-          show: {
-            select: {
-              library: {
-                select: {
-                  path: true
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }).then(episode =>
-    episode ? path.join(episode.season.show.library.path, episode.path) : undefined);
-}
-
-export const getLibraryPathByEpisodeId = (repository: RepositoryManager, id: number) => {
-  return repository.episode.findById(id, {
-    include: {
-      season: {
-        select: {
-          show: {
-            select: {
-              library: {
-                select: {
-                  path: true
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }).then(episode => episode?.season.show.library.path || undefined);
-}
-
-export const normalizeEpisode = (episode: Awaited<ReturnType<typeof getEpisodeWithMetadata>>): EpisodeResponse => {
-  if (!episode) {
-    throw new Error('Episode was null');
-  }
-  return normalizeEpisodes([episode])[0];
-}
-export const normalizeEpisodes = (episodes: Awaited<ReturnType<typeof listEpisodesWithMetadata>>): EpisodeResponse[] => {
-  return episodes.map(episode => ({
-    id: episode.id,
+export const normalizeBasicEpisode = (episode: Episode): BasicEpisodeResponse => {
+  return {
     showId: episode.showId,
     season: episode.metadata?.seasonNumber || episode.seasonNumber,
     episode: episode.metadata?.episodeNumber || episode.episodeNumber,
-    title: episode.metadata?.name,
+    addedDate: cleanDate(episode.addedDate),
+    posterId: episode.metadata?.images.find(image => image.type === ImageType.POSTER)?.id ||
+      episode.season.metadata?.images.find(image => image.type === ImageType.POSTER)?.id ||
+      episode.season.show.metadata?.images.find(image => image.type === ImageType.POSTER)?.id,
+    backdropId: episode.metadata?.images.find(image => image.type === ImageType.BACKDROP)?.id ||
+      episode.season.metadata?.images.find(image => image.type === ImageType.BACKDROP)?.id ||
+      episode.season.show.metadata?.images.find(image => image.type === ImageType.BACKDROP)?.id,
+    logoId: episode.metadata?.images.find(image => image.type === ImageType.LOGO)?.id,
+  };
+}
+
+export const normalizeDetailedEpisode = (episode: Episode): DetailedEpisodeResponse => {
+  return {
+    showId: episode.showId,
+    season: episode.season.metadata?.seasonNumber || episode.seasonNumber,
+    episode: episode.metadata?.episodeNumber || episode.episodeNumber,
+    title: episode.metadata?.title,
     overview: episode.metadata?.overview,
     addedDate: cleanDate(episode.addedDate),
     airDate: cleanDate(episode.metadata?.airDate),
     duration: episode.duration || undefined,
     posterId: episode.metadata?.images.find(image => image.type === ImageType.POSTER)?.id ||
-      episode.season.seasonMetadata?.images.find(image => image.type === ImageType.POSTER)?.id ||
-      episode.season.show.showMetadata?.images.find(image => image.type === ImageType.POSTER)?.id,
+      episode.season.metadata?.images.find(image => image.type === ImageType.POSTER)?.id ||
+      episode.season.show.metadata?.images.find(image => image.type === ImageType.POSTER)?.id,
     backdropId: episode.metadata?.images.find(image => image.type === ImageType.BACKDROP)?.id ||
-      episode.season.seasonMetadata?.images.find(image => image.type === ImageType.BACKDROP)?.id ||
-      episode.season.show.showMetadata?.images.find(image => image.type === ImageType.BACKDROP)?.id,
+      episode.season.metadata?.images.find(image => image.type === ImageType.BACKDROP)?.id ||
+      episode.season.show.metadata?.images.find(image => image.type === ImageType.BACKDROP)?.id,
     logoId: episode.metadata?.images.find(image => image.type === ImageType.LOGO)?.id,
-  }))
+  };
+}
+
+export const normalizeBasicEpisodes = (episodes: Episode[]): BasicEpisodeResponse[] => {
+  return episodes.map(normalizeBasicEpisode);
+};
+
+export const normalizeDetailedEpisodes = (episodes: Episode[]): DetailedEpisodeResponse[] => {
+  return episodes.map(normalizeDetailedEpisode);
 };

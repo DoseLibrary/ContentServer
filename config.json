@@ -26,5 +26,6 @@
         },
         "primaryVideoCodec": "h264",
         "secondaryVideoCodec": "h265"
-    }
+    },
+    "setupComplete": true
 }

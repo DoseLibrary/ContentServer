@@ -1,12 +1,8 @@
 import { EventEmitter } from "events";
-import { LibraryType, Library as LibraryModel, PrismaClient, ImageType } from "@prisma/client";
 import path from 'path';
 import UnsuportedFormatException from "../../exceptions/UnsupportedFormat";
 import { valueExistInEnum } from "../../util/enum";
-import { RepositoryManager } from "../repository";
-import { downloadPreferredImage, getPreferredImage } from "../api/util/images";
-import { PreferredImage } from "../../types/PreferredImage";
-import { Image, ImageClient } from "../api/ImageClient";
+import { ImageClient } from "../api/ImageClient";
 import { MetadataClient } from "../api/MetadataClient";
 import { getDurationFromVideoMetadata, getVideoMetadata } from "../../util/video";
 import { getLanguageNameFromCode, getLanguageNameFromString } from "../../util/language";
@@ -34,37 +30,33 @@ interface FileMetadata {
   possibleReleaseYears: number[];
 };
 
-export abstract class Library implements LibraryModel {
+export abstract class Library {
   private _id: number;
-  private _type: LibraryType;
   private _name: string;
   private _path: string;
   private subtitleMutex = new Mutex();
   private waitingSubtitles: string[] = []; // Path to subtitle files
-  protected repository: RepositoryManager;
   protected metadataClient: MetadataClient;
   protected imageClient: ImageClient;
   protected emitter: EventEmitter;
 
   constructor(
-    model: LibraryModel,
-    repository: RepositoryManager,
+    id: number,
+    name: string,
+    path: string,
     metadataClient: MetadataClient,
     imageClient: ImageClient,
     emitter: EventEmitter
   ) {
-    this._id = model.id;
-    this._type = model.type;
-    this._name = model.name;
-    this._path = model.path;
-    this.repository = repository;
+    this._id = id;
+    this._name = name;
+    this._path = path;
     this.metadataClient = metadataClient;
     this.imageClient = imageClient;
     this.emitter = emitter;
   }
 
   get id() { return this._id }
-  get type() { return this._type }
   get name() { return this._name }
   get path() { return this._path }
 
@@ -140,6 +132,7 @@ export abstract class Library implements LibraryModel {
    * @param fileName - The name of the subtitle file.
    */
   private async tryAddSubtitle(filePath: string, fileName: string) {
+    /*
     await this.subtitleMutex.acquire();
     try {
       const alreadyAdded = await this.repository.subtitle.findByPath(filePath) !== null;
@@ -153,6 +146,7 @@ export abstract class Library implements LibraryModel {
     } finally {
       this.subtitleMutex.release();
     }
+    */
   }
 
   /**
@@ -189,7 +183,7 @@ export abstract class Library implements LibraryModel {
   private getReleaseYears(filePath: string): number[] {
     const re = new RegExp("[\\.(](\\d{4})[\\.)]", "gm");
     const matches = re.exec(filePath);
-    const result = [];
+    const result: number[] = [];
     if (matches !== null) {
       for (let i = 1; i < matches.length; i++) {
         const year = parseInt(matches[i]);
@@ -201,9 +195,11 @@ export abstract class Library implements LibraryModel {
     return result;
   }
 
+  /*
   protected downloadPreferredImage(images: Image[], downloadPath: string, type: ImageType): Promise<PreferredImage | undefined> {
     return downloadPreferredImage(this.imageClient, images, downloadPath, type);
   }
+  */
 
   private getSubtitleLanguage(fileName: string): string {
     const dotSplit = fileName.split('.');

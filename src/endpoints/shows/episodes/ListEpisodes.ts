@@ -2,10 +2,9 @@ import { EventEmitter } from 'events';
 import { ValidationChain, query } from "express-validator";
 import { GetEndpoint } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
-import { RepositoryManager } from '../../../lib/repository';
-import { ImageType } from '@prisma/client';
-import { EpisodeResponse } from '../../shows/types/EpisodeResponse';
-import { listEpisodesWithMetadata, normalizeEpisodes } from '../../../lib/queries/episodeQueries';
+import { normalizeBasicEpisodes } from '../../../lib/queries/episodeQueries';
+import { EpisodeRepository } from '../../../repositories/EpisodeRepository';
+import { BasicEpisodeResponse } from '../../../types/episode/BasicEpisodeResponse';
 
 interface QueryParams {
   limit: number;
@@ -13,8 +12,8 @@ interface QueryParams {
 }
 
 export class ListEpisodes extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/list/episodes', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/list/episodes', emitter);
     this.setAuthRequired(false);
   }
 
@@ -24,10 +23,14 @@ export class ListEpisodes extends GetEndpoint {
       query('offset', 'How many records to skip').default(0).isInt({ min: 0 }).toInt()
     ]
   }
-  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<EpisodeResponse[]> {
+  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<BasicEpisodeResponse[]> {
     const orderBy = undefined;
     const { limit, offset } = data.query;
-    const episodes = await listEpisodesWithMetadata(this.repository, orderBy, limit, offset);
-    return normalizeEpisodes(episodes);
+    const episodes = await EpisodeRepository.find({
+      take: limit,
+      skip: offset,
+      relations: ['season', 'season.metadata', 'season.show', 'season.show.metadata']
+    });
+    return normalizeBasicEpisodes(episodes);
   }
 }

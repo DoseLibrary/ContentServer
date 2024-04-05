@@ -2,16 +2,18 @@ import { EventEmitter } from "events";
 import { ValidationChain, param } from "express-validator";
 import { GetEndpoint } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
-import { RepositoryManager } from "../../../lib/repository";
 import { getUserWatchlist, getWatchedMovies, listOngoingMovies } from "../../../lib/queries/userQueries";
+import { UserOngoingMovieRepository } from "../../../repositories/UserOngoingMovieRepository";
+import { UserRepository } from "../../../repositories/UserRepository";
+import { NotFoundException } from "../../../exceptions/NotFoundException";
 
 interface Param {
   id: number;
 }
 
 export class GetUserMovieData extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/movie/:id', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/movie/:id', emitter);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -20,16 +22,22 @@ export class GetUserMovieData extends GetEndpoint {
     ]
   }
   protected async execute(data: RequestData<unknown, unknown, Param>): Promise<unknown> {
-    const ongoingMovies = await listOngoingMovies(this.repository, data.userId);
-    const watchlist = await getUserWatchlist(this.repository, data.userId);
-    const watchedMovie = await getWatchedMovies(this.repository, data.userId);
+    const user = await UserRepository.findOneById(data.userId, {
+      relations: ['watchlistMovies', 'watchedMovies']
+    });
+    const entity = await UserOngoingMovieRepository.findOngoingMovieByUserIdAndMovieId(data.userId, data.params.id);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-    const ongoingMovie = ongoingMovies.find(movie => movie.id === data.params.id);
+    const inWatchlist = user.watchlistMovies.some(movie => movie.id === data.params.id);
+    const watched = user.watchedMovies.some(movie => movie.id === data.params.id);
+
     return {
-      lastWatched: ongoingMovie?.lastWatched,
-      timeWatched: ongoingMovie?.timeWatched,
-      inWatchlist: watchlist.some(movie => movie.id === data.params.id),
-      watched: watchedMovie.some(movie => movie.id === data.params.id)
+      lastWatched: entity?.lastWatched,
+      timeWatched: entity?.time,
+      inWatchlist,
+      watched,
     }
   }
 

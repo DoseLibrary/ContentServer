@@ -2,42 +2,37 @@ import { EventEmitter } from 'events';
 import { ValidationChain, param, query } from "express-validator";
 import { GetEndpoint, ResponseHeaders } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
-import { RepositoryManager } from "../../../lib/repository";
-import { getMoviePathById } from '../../../lib/queries/movieQueries';
 import { NotFoundException } from '../../../exceptions/NotFoundException';
 import { getVideoMetadata, getVideoResolutionsFromStreams, getVideoStreamsFromMetadata } from '../../../util/video';
 import { v4 as uuidv4 } from 'uuid';
 import { Resolution } from '../../../types/AvailableResolutions';
-import { getEpisodePathById } from '../../../lib/queries/episodeQueries';
 import { AvailableSubtitle } from '../../../types/AvailableSubtitle';
+import { MovieRepository } from '../../../repositories/MovieRepository';
+import { EpisodeRepository } from '../../../repositories/EpisodeRepository';
 
-enum Type {
-  MOVIE = 'movie',
-  EPISODE = 'episode'
-}
-
-interface Param {
+interface MovieParam {
   id: number;
 }
+
+interface EpisodeParam {
+  showId: number;
+  seasonNumber: number;
+  episodeNumber: number;
+};
+
 interface Query {
-  type: Type;
   audioStream: number;
   token: string;
 }
 
-export class HlsMasterEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/:id/hls/master', emitter, repository);
+abstract class HlsMasterEndpoint extends GetEndpoint {
+  constructor(reqPath: string, emitter: EventEmitter) {
+    super(reqPath, emitter);
   }
 
-  protected getValidator(): ValidationChain[] {
-    return [
-      param('id').isInt({ min: 0 }).toInt(),
-      query('type').isIn(Object.values(Type)),
-      query('audioStream').isInt().toInt(),
-      query('token').isString()
-    ]
-  }
+  protected abstract getPath(param: MovieParam | EpisodeParam): Promise<string>;
+  protected abstract getSubtitleStreamFilePath(param: MovieParam | EpisodeParam, token: string): string;
+  protected abstract getHlsStreamFilePath(param: MovieParam | EpisodeParam, resolution: string, audioStream: number, token: string, uuid: string): string;
 
   protected async headers(data: RequestData<unknown, unknown, unknown>): Promise<ResponseHeaders> {
     const headers = new Headers();
@@ -48,10 +43,9 @@ export class HlsMasterEndpoint extends GetEndpoint {
     }
   }
 
-  protected async execute(data: RequestData<unknown, Query, Param>): Promise<string> {
-    const { id } = data.params;
-    const { audioStream, type, token } = data.query;
-    const path = type === Type.MOVIE ? await getMoviePathById(this.repository, id) : await getEpisodePathById(this.repository, id);
+  protected async execute(data: RequestData<unknown, Query, MovieParam | EpisodeParam>): Promise<string> {
+    const { audioStream, token } = data.query;
+    const path = await this.getPath(data.params);
     if (!path) {
       throw new NotFoundException();
     }
@@ -65,22 +59,22 @@ export class HlsMasterEndpoint extends GetEndpoint {
     if (!stream) {
       throw new Error('No video streams found in file');
     }
-    const subtitles = await this.repository[type].getSubtitles(id);
+    // TODO: subtitle support;
+    const subtitles: AvailableSubtitle[] = []; // await this.repository[type].getSubtitles(id);
     const fps = this.calculateFps(stream.r_frame_rate);
     const uuid = uuidv4();
 
     let m3u8 = '#EXTM3U\n';
     m3u8 += '#EXT-X-VERSION:3\n';
     m3u8 += '#EXT-X-INDEPENDENT-SEGMENTS\n';
-    m3u8 += this.getSubtitleM3u8Setting(subtitles, type, token);
+    m3u8 += this.getSubtitleM3u8Setting(subtitles, data.params, token);
     for (let resolution of resolutions) {
       m3u8 += this.getResolutionM3u8Setting(
         audioStream,
         resolution,
         this.getPixels(resolution),
         fps,
-        id,
-        type,
+        data.params,
         token,
         uuid
       );
@@ -88,9 +82,9 @@ export class HlsMasterEndpoint extends GetEndpoint {
     return m3u8;
   }
 
-  private getSubtitleM3u8Setting(subtitles: AvailableSubtitle[], type: string, token: string) {
+  private getSubtitleM3u8Setting(subtitles: AvailableSubtitle[], params: EpisodeParam | MovieParam, token: string) {
     return subtitles.map(({ language, id }) =>
-      `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",LANGUAGE="${language}",NAME="${language}",FORCED=NO,AUTOSELECT=NO,DEFAULT=NO,URI="/api/video/hls/subtitle/${id}?token=${token}"\n`
+      `#EXT-X-MEDIA:TYPE=SUBTITLES,GROUP-ID="subs",LANGUAGE="${language}",NAME="${language}",FORCED=NO,AUTOSELECT=NO,DEFAULT=NO,URI="${this.getSubtitleStreamFilePath(params, token)}"\n`
     ).join('');
   }
 
@@ -99,8 +93,7 @@ export class HlsMasterEndpoint extends GetEndpoint {
     resolution: string,
     pixelResolution: string,
     fps: number,
-    id: number,
-    type: string,
+    params: EpisodeParam | MovieParam,
     token: string,
     uuid: string
   ): string {
@@ -143,7 +136,7 @@ export class HlsMasterEndpoint extends GetEndpoint {
     }
 
     let text = `#EXT-X-STREAM-INF:BANDWIDTH=${bandwidth},AVERAGE-BANDWIDTH=${averageBandwidth},VIDEO-RANGE=SDR,CODECS="avc1.640028,mp4a.40.2",RESOLUTION=${pixelResolution},FRAME-RATE=${fps},NAME="${resolution}"\n`;
-    text += `/api/video/${id}/hls/${resolution}?&audioStream=${audioStream}&type=${type}&token=${token}&transcoding=${uuid}\n`;
+    text += `${this.getHlsStreamFilePath(params, resolution, audioStream, token, uuid)}\n`;
     return text;
   }
 
@@ -176,5 +169,55 @@ export class HlsMasterEndpoint extends GetEndpoint {
       default:
         throw new Error(`Invalid resolution "${resolution}"`);
     }
+  }
+}
+
+export class MovieHlsMasterEndpoint extends HlsMasterEndpoint {
+  constructor(emitter: EventEmitter) {
+    super('/movie/:id/hls/master', emitter);
+  }
+
+  protected getValidator(): ValidationChain[] {
+    return [
+      param('id').isInt({ min: 0 }).toInt(),
+    ]
+  }
+
+  protected getPath(data: MovieParam): Promise<string> {
+    return MovieRepository.getMoviePathById(data.id);
+  }
+
+  protected getSubtitleStreamFilePath(data: MovieParam, token: string): string {
+    return `/api/video/movie/${data.id}/hls/subtitle?token=${token}`;
+  }
+
+  protected getHlsStreamFilePath(data: MovieParam, resolution: string, audioStream: number, token: string, uuid: string): string {
+    return `/api/video/movie/${data.id}/hls/${resolution}?audioStream=${audioStream}&token=${token}&transcoding=${uuid}`;
+  }
+}
+
+export class EpisodeHlsMasterEndpoint extends HlsMasterEndpoint {
+  constructor(emitter: EventEmitter) {
+    super('/show/:showId/season/:seasonNumber/episode/:episodeNumber/hls/master', emitter);
+  }
+
+  protected getValidator(): ValidationChain[] {
+    return [
+      param('showId').isInt({ min: 0 }).toInt(),
+      param('seasonNumber').isInt({ min: 0 }).toInt(),
+      param('episodeNumber').isInt({ min: 0 }).toInt(),
+    ]
+  }
+
+  protected getPath(data: EpisodeParam): Promise<string> {
+    return EpisodeRepository.getEpisodePath(data.showId, data.seasonNumber, data.episodeNumber);
+  }
+
+  protected getSubtitleStreamFilePath(data: EpisodeParam, token: string): string {
+    return `/api/video/show/${data.showId}/season/${data.seasonNumber}/episode/${data.episodeNumber}/hls/subtitle?token=${token}`;
+  }
+
+  protected getHlsStreamFilePath(data: EpisodeParam, resolution: string, audioStream: number, token: string, uuid: string): string {
+    return `/api/video/show/${data.showId}/season/${data.seasonNumber}/episode/${data.episodeNumber}/hls/${resolution}?audioStream=${audioStream}&token=${token}&transcoding=${uuid}`;
   }
 }

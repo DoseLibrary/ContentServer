@@ -5,16 +5,15 @@ import * as chokidar from 'chokidar';
 import { Log } from "./Logger";
 import path from 'path';
 import UnsuportedFormatException from "../exceptions/UnsupportedFormat";
-import { RepositoryManager } from "./repository";
 import ParseException from "../exceptions/ParseException";
+import { Library as LibraryModel } from "../models/Library";
+import { AppDataSource } from "../DataSource";
 
 export class Watcher {
   private libraries: Library[] = [];
-  private repository: RepositoryManager;
   private chokidarOptions: chokidar.WatchOptions;
 
-  constructor(repository: RepositoryManager, libraries: Library[] = []) {
-    this.repository = repository;
+  constructor(libraries: Library[] = []) {
     this.libraries = libraries;
     this.chokidarOptions = {
       ignored: this.getIgnoredFileRegex(),
@@ -67,8 +66,15 @@ export class Watcher {
   }
 
   private async setLibraries(emitter: EventEmitter) {
-    const libraries = await this.repository.library.list();
-    this.libraries = libraries.map(lib => createLibraryFromModel(lib, this.repository, emitter));
+    const libraryRepository = AppDataSource.getRepository(LibraryModel);
+    const libraries = await libraryRepository.find();
+    this.libraries = libraries.map(lib => createLibraryFromModel(
+      lib.id,
+      lib.type,
+      lib.name,
+      lib.path,
+      emitter
+    ));
   }
 
   private getIgnoredFileRegex() {

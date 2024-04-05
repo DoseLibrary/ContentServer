@@ -1,6 +1,5 @@
 import { EventEmitter } from "events";
 import { DeleteEndpoint } from "../../../lib/Endpoint";
-import { RepositoryManager } from "../../../lib/repository";
 import { ValidationChain, query } from "express-validator";
 import transcodingManager from "../../../lib/transcodings/TranscodingManager";
 import { RequestData } from "../../../types/RequestData";
@@ -11,8 +10,8 @@ interface Query {
 };
 
 export class HlsStopTranscoding extends DeleteEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/hls/stop', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/hls/stop', emitter);
     this.setAuthRequired(false);
   }
 

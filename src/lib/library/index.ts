@@ -1,21 +1,32 @@
 import { EventEmitter } from "events";
-import { LibraryType, Library as LibraryModel, PrismaClient } from "@prisma/client";
 import { Library } from "./Library";
 import { MovieLibrary } from "./MovieLibrary";
-import { RepositoryManager } from "../repository";
 import { ShowLibrary } from "./ShowLibrary";
+import { LibraryType } from "../../models/Library";
 
 export const createLibraryFromModel = (
-  model: LibraryModel,
-  repository: RepositoryManager,
+  id: number,
+  type: LibraryType,
+  name: string,
+  path: string,
   emitter: EventEmitter
 ): Library => {
-  switch (model.type) {
+  switch (type) {
     case LibraryType.MOVIE:
-      return new MovieLibrary(model, repository, emitter);
+      return new MovieLibrary(
+        id,
+        name,
+        path,
+        emitter
+      );
     case LibraryType.SHOW:
-      return new ShowLibrary(model, repository, emitter);
+      return new ShowLibrary(
+        id,
+        name,
+        path,
+        emitter
+      );
     default:
-      throw new Error(`Library ${model.type} is not implemented yet`);
+      throw new Error(`Library ${type} is not implemented yet`);
   }
 }

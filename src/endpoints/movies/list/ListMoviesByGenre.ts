@@ -2,9 +2,9 @@ import { EventEmitter } from 'events';
 import { ValidationChain, param, query } from "express-validator";
 import { GetEndpoint } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
-import { RepositoryManager } from '../../../lib/repository';
-import { MovieResponse } from '../types/MovieResponse';
-import { MovieOrderBy, MovieOrderByOptions, listMoviesByGenreWithMetadata, normalizeMovies } from '../../../lib/queries/movieQueries';
+import { MovieOrderBy, MovieOrderByOptions, normalizeBasicMovies } from '../../../lib/queries/movieQueries';
+import { MovieRepository } from '../../../repositories/MovieRepository';
+import { BasicMovieResponse } from '../../../types/movie/BasicMovieResponse';
 
 interface Query {
   orderBy: MovieOrderBy;
@@ -17,8 +17,8 @@ interface Param {
 }
 
 export class ListMoviesByGenreEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/list/genre/:genre', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/list/genre/:genre', emitter);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -29,14 +29,28 @@ export class ListMoviesByGenreEndpoint extends GetEndpoint {
       param('genre').isString()
     ]
   }
-  protected async execute(data: RequestData<unknown, Query, Param>): Promise<MovieResponse[]> {
+  protected async execute(data: RequestData<unknown, Query, Param>): Promise<BasicMovieResponse[]> {
     const { genre } = data.params;
     const { limit, offset } = data.query;
     const orderBy: MovieOrderByOptions = {
       field: data.query.orderBy,
       dir: 'desc'
     }
-    const movies = await listMoviesByGenreWithMetadata(this.repository, genre, orderBy, limit, offset);
-    return normalizeMovies(movies);
+    const movies = await MovieRepository.find({
+      where: {
+        metadata: {
+          genres: {
+            name: genre
+          }
+        }
+      },
+      order: {
+        [orderBy.field]: orderBy.dir
+      },
+      take: limit,
+      skip: offset
+    });
+
+    return normalizeBasicMovies(movies);
   }
 }

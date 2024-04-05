@@ -1,21 +1,20 @@
 import { EventEmitter } from 'events';
 import { ValidationChain, param } from "express-validator";
 import { GetEndpoint } from '../../lib/Endpoint';
-import { RepositoryManager } from '../../lib/repository';
 import { RequestData } from '../../types/RequestData';
 import { getAudioCodecsFromStreams, getVideoCodecFromStreams, getVideoMetadata, getVideoResolutionsFromStreams } from '../../util/video';
-import { getMoviePathById } from '../../lib/queries/movieQueries';
 import { NotFoundException } from '../../exceptions/NotFoundException';
 import { createClientFromUserAgent } from '../../lib/clients';
 import { AvailableResolutions } from '../../types/AvailableResolutions';
+import { MovieRepository } from '../../repositories/MovieRepository';
 
 interface Param {
   id: number;
 }
 
 export class GetMovieResolutionsEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/:id/resolutions', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/:id/resolutions', emitter);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -25,8 +24,8 @@ export class GetMovieResolutionsEndpoint extends GetEndpoint {
   }
 
   protected async execute(data: RequestData<unknown, unknown, Param>): Promise<AvailableResolutions> {
-    const moviePath = await getMoviePathById(this.repository, data.params.id);
-    if (!moviePath) {
+    const moviePath = await MovieRepository.getMoviePathById(data.params.id);
+    if (moviePath === undefined) {
       throw new NotFoundException('Movie not found');
     }
 

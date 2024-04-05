@@ -1,35 +1,8 @@
-import { ImageType, Prisma } from "@prisma/client";
-import { RepositoryManager } from "../repository";
-import { ShowResponse } from "../../endpoints/shows/types/ShowResponse";
 import { cleanDate } from "../../util/date";
-
-const showWithMetadataQuery = {
-  showMetadata: {
-    include: {
-      images: {
-        select: {
-          id: true,
-          type: true
-        }
-      },
-      genres: true,
-    }
-  },
-  seasons: {
-    include: {
-      seasonMetadata: {
-        include: {
-          images: {
-            select: {
-              id: true,
-              type: true
-            }
-          }
-        }
-      }
-    }
-  }
-}
+import { Show } from "../../models/Show";
+import { ImageType } from "../../models/Image";
+import { BasicShowResponse } from "../../types/show/BasicShowResponse";
+import { DetailedShowResponse } from "../../types/show/DetailedShowResponse";
 
 export enum ShowOrderBy {
   ADDED_DATE = 'addedDate',
@@ -41,99 +14,41 @@ export interface ShowOrderByOptions {
   dir: 'asc' | 'desc'
 }
 
-const createOrderBy = (data?: ShowOrderByOptions): Prisma.ShowOrderByWithRelationInput | undefined => {
-  switch (data?.field) {
-    case ShowOrderBy.ADDED_DATE:
-      return {
-        addedDate: data.dir
-      }
-    case ShowOrderBy.RELEASE_DATE:
-      return {
-        showMetadata: {
-          firstAirDate: data.dir
-        }
-      }
-  }
-}
-
-export const listShowsWithMetadata = (
-  repository: RepositoryManager,
-  orderBy?: ShowOrderByOptions,
-  limit?: number,
-  offset?: number
-) => {
-  return repository.show.list(
-    {
-      include: showWithMetadataQuery,
-      orderBy: createOrderBy(orderBy)
-    },
-    limit,
-    offset
-  )
-}
-
-export const listShowsByTitleWithMetadata = (
-  repository: RepositoryManager,
-  title: string,
-) => {
-  return repository.show.findByTitle(title, {
-    include: showWithMetadataQuery
-  });
-}
-
-export const listShowsByGenreWithMetadata = (
-  repository: RepositoryManager,
-  genre: string,
-  orderBy?: ShowOrderByOptions,
-  limit?: number,
-  offset?: number
-) => {
-  return repository.show.list(
-    {
-      include: showWithMetadataQuery,
-      where: {
-        showMetadata: {
-          genres: {
-            some: {
-              name: genre
-            }
-          }
-        }
-      },
-      orderBy: createOrderBy(orderBy)
-    },
-    limit,
-    offset
-  )
-}
-
-export const findShowByIdWithMetadata = (repository: RepositoryManager, id: number) => {
-  return repository.show.findById(id, {
-    include: showWithMetadataQuery
-  })
-}
-
-export const normalizeShow = (show: Awaited<ReturnType<typeof findShowByIdWithMetadata>>): ShowResponse => {
-  if (show === null) {
-    throw new Error('Show was null');
-  }
-  return normalizeShows([show])[0];
-}
-export const normalizeShows = (shows: Awaited<ReturnType<typeof listShowsWithMetadata>>): ShowResponse[] => {
-  return shows.map(show => ({
+export const normalizeDetailedShow = (show: Show): DetailedShowResponse => {
+  return {
     id: show.id,
-    title: show.showMetadata?.title || show.name,
-    overview: show.showMetadata?.overview,
-    firstAirDate: cleanDate(show.showMetadata?.firstAirDate),
+    title: show.metadata?.title || show.name,
+    overview: show.metadata?.overview,
+    firstAirDate: cleanDate(show.metadata?.firstAirDate),
     addedDate: cleanDate(show.addedDate),
-    genres: show.showMetadata?.genres?.map(genre => genre.name),
-    posterId: show.showMetadata?.images?.find(image => image.type === ImageType.POSTER)?.id,
-    backdropId: show.showMetadata?.images?.find(image => image.type === ImageType.BACKDROP)?.id,
-    logoId: show.showMetadata?.images?.find(image => image.type === ImageType.LOGO)?.id,
+    genres: show.metadata?.genres?.map(genre => genre.name) || [],
+    posterId: show.metadata?.images?.find(image => image.type === ImageType.POSTER)?.id,
+    backdropId: show.metadata?.images?.find(image => image.type === ImageType.BACKDROP)?.id,
+    logoId: show.metadata?.images?.find(image => image.type === ImageType.LOGO)?.id,
     seasons: show.seasons.map(season => ({
-      title: season.seasonMetadata?.name,
-      number: season.seasonMetadata?.seasonNumber || season.seasonNumber,
-      posterId: season.seasonMetadata?.images?.find(image => image.type === ImageType.POSTER)?.id
+      title: season.metadata?.title,
+      number: season.metadata?.seasonNumber || season.seasonNumber,
+      posterId: season.metadata?.images?.find(image => image.type === ImageType.POSTER)?.id
     }))
-  }));
+  };
+};
+
+export const normalizeDetailedShows = (shows: Show[]): DetailedShowResponse[] => {
+  return shows.map(normalizeDetailedShow);
+};
+
+export const normalizeBasicShow = (show: Show): BasicShowResponse => {
+  return {
+    id: show.id,
+    title: show.metadata?.title || show.name,
+    addedDate: cleanDate(show.addedDate),
+    overview: show.metadata?.overview,
+    posterId: show.metadata?.images?.find(image => image.type === ImageType.POSTER)?.id,
+    backdropId: show.metadata?.images?.find(image => image.type === ImageType.BACKDROP)?.id,
+    logoId: show.metadata?.images?.find(image => image.type === ImageType.LOGO)?.id,
+  };
+}
+
+export const normalizeBasicShows = (shows: Show[]): BasicShowResponse[] => {
+  return shows.map(normalizeBasicShow);
 }

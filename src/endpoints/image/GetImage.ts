@@ -2,14 +2,11 @@ import { EventEmitter } from 'events';
 import { ValidationChain, param, query } from "express-validator";
 import { GetEndpoint, ResponseType } from "../../lib/Endpoint";
 import { RequestData } from "../../types/RequestData";
-import { RepositoryManager } from "../../lib/repository";
 import sharp from 'sharp';
 import { NotFoundException } from '../../exceptions/NotFoundException';
-import fs from 'fs';
-import stream from 'stream';
+import stream, { Readable } from 'stream';
 import { Log } from '../../lib/Logger';
-import { ImageSource } from '@prisma/client';
-import { TmdbImageClient } from '../../lib/api/tmdb/TmdbImageClient';
+import { ImageRepository } from '../../repositories/ImageRepository';
 
 enum Size {
   SMALL = 'small',
@@ -27,8 +24,8 @@ interface Query {
 }
 
 export class GetImageEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/:id', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/:id', emitter);
     this.setResponseType(ResponseType.STREAM);
     this.setAuthRequired(false);
   }
@@ -42,54 +39,28 @@ export class GetImageEndpoint extends GetEndpoint {
   protected async execute(data: RequestData<unknown, Query, Params>): Promise<stream> {
     const { id } = data.params;
     const { size } = data.query;
-    const image = await this.repository.image.findById(id);
+    const image = await ImageRepository.findOneById(id);
     if (image === null) {
       throw new NotFoundException('Image not found');
     }
 
-    if (image.source !== ImageSource.INTERNAL) {
-      const downloaded = await this.downloadExternalImage(image.path, size, image.source);
-      return sharp(downloaded);
-    }
-
+    const buffer = Buffer.from(image.data, 'base64');
     if (data.query.size === Size.ORIGINAL) {
-      return fs.createReadStream(image.path);
+      return Readable.from(buffer);
     }
 
-    return sharp(image.path)
+    return sharp(buffer)
       .metadata()
       .then(({ width }) => {
         if (width === undefined) {
-          Log.warning(`Could not resize scale ${image.path}. Using original`);
-          return fs.createReadStream(image.path)
+          Log.warning(`Could not resize scale ${image.id}. Using original`);
+          return Readable.from(buffer);
         } else {
-          return sharp(image.path)
+          return sharp(buffer)
             .resize(Math.round(width * this.getScaleFactor(size)))
             .png();
         }
       });
-  }
-
-  private downloadExternalImage(url: string, size: Size, source: ImageSource) {
-    switch (source) {
-      case ImageSource.TMDB:
-        const imageClient = new TmdbImageClient('19065a8218d4c104a51afcc3e2a9b971');
-        return imageClient.downloadImage(url, this.getQualityParam(size, source));
-      default:
-        throw new Error(`${source} is not a valid image source`);
-    }
-  }
-
-  private getQualityParam(size: Size, source: ImageSource) {
-    switch (source) {
-      case ImageSource.TMDB:
-        if (size === Size.ORIGINAL) {
-          return 'original';
-        }
-        return 'w500'; // TODO: Implement more sizes
-      default:
-        throw new Error(`${source} is not a valid image source`);
-    }
   }
 
   private getScaleFactor(size: Size) {

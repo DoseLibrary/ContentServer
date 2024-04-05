@@ -1,5 +1,4 @@
 import { EventEmitter } from "events";
-import { RepositoryManager } from "../../../lib/repository";
 import { PostEndpoint } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
 import { ValidationChain, query } from "express-validator";
@@ -10,8 +9,8 @@ interface Query {
 }
 
 export class HlsPingEndpoint extends PostEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/hls/ping', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/hls/ping', emitter);
   }
 
   protected getValidator(): ValidationChain[] {

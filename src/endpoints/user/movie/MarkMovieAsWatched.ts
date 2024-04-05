@@ -2,16 +2,17 @@ import { EventEmitter } from "events";
 import { ValidationChain, param } from "express-validator";
 import { PostEndpoint } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
-import { RepositoryManager } from "../../../lib/repository";
 import { NotFoundException } from "../../../exceptions/NotFoundException";
+import { UserRepository } from "../../../repositories/UserRepository";
+import { MovieRepository } from "../../../repositories/MovieRepository";
 
 interface Param {
   id: number;
 }
 
 export class MarkMovieAsWatchedEndpoint extends PostEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/movie/:id/watched', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/movie/:id/watched', emitter);
   }
 
 
@@ -21,14 +22,16 @@ export class MarkMovieAsWatchedEndpoint extends PostEndpoint {
     ]
   }
   protected async execute(data: RequestData<unknown, unknown, Param>): Promise<void> {
-    try {
-      await this.repository.user.markMovieAsWatched(data.userId, data.params.id);
-    } catch (e: any) {
-      if (e.code === 'P2025') {
-        throw new NotFoundException('Movie not found');
-      }
-      throw e;
+    const { id: movieId } = data.params;
+    const user = await UserRepository.findOneById(data.userId, {
+      relations: ['watchedMovies']
+    });
+    const movie = await MovieRepository.findOneById(movieId);
+    if (!user || !movie) {
+      throw new NotFoundException('User or movie not found');
     }
+    user.watchedMovies = [...user.watchedMovies, movie]
+      .filter((movie, idx, arr) => arr.findIndex(m => m.id === movie.id) === idx);
+    await UserRepository.save(user);
   }
-
 }

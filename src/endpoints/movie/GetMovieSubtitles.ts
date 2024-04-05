@@ -2,7 +2,6 @@ import { EventEmitter } from 'events';
 import { ValidationChain, param } from "express-validator";
 import { GetEndpoint } from "../../lib/Endpoint";
 import { RequestData } from "../../types/RequestData";
-import { RepositoryManager } from '../../lib/repository';
 import { AvailableSubtitle } from '../../types/AvailableSubtitle';
 
 interface Param {

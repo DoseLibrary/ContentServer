@@ -1,24 +1,37 @@
-import { MovieMetadata as MovieMetadataModel, SeasonMetadata as SeasonMetadataModel, ShowMetadata as ShowMetadataModel, EpisodeMetadata as EpisodeMetadataModel } from "@prisma/client";
+// TODO: Remove everything related to prisma
+import { SeasonMetadata as SeasonMetadataModel, ShowMetadata as ShowMetadataModel, EpisodeMetadata as EpisodeMetadataModel } from "@prisma/client";
 
-export type MovieMetadata = Omit<
-  MovieMetadataModel,
-  'movieId' | 'popular'
-> & { genres: string[] };
+export type MovieMetadata = {
+  title: string;
+  overview: string;
+  releaseDate: Date;
+  externalId: number;
+  genres: string[];
+}
 
-export type ShowMetadata = Omit<
-  ShowMetadataModel,
-  'showId'
-> & { genres: string[] };
+export type ShowMetadata  = {
+  title: string;
+  overview: string;
+  firstAirDate: Date;
+  externalId: number;
+  popularity: number;
+  genres: string[];
+}
 
-export type SeasonMetadata = Omit<
-  SeasonMetadataModel,
-  'showId' | 'id'
->;
+export type SeasonMetadata = {
+  name: string;
+  airDate: Date;
+  overview: string;
+  seasonNumber: number;
+}
 
-export type EpisodeMetadata = Omit<
-  EpisodeMetadataModel,
-  'showId' | 'seasonNumber' | 'id'
-  >;
+export type EpisodeMetadata = {
+  episodeNumber: number;
+  airDate: Date;
+  name: string;
+  overview: string;
+  voteAverage: number;
+}
 
 export type Cast = {
   id: number;

@@ -1,19 +1,19 @@
 import { EventEmitter } from "events";
 import { GetEndpoint } from "../../lib/Endpoint";
-import { RepositoryManager } from "../../lib/repository";
 import { ValidationChain, param } from "express-validator";
 import { RequestData } from "../../types/RequestData";
-import { findShowByIdWithMetadata, normalizeShow } from "../../lib/queries/showQueries";
+import { normalizeDetailedShow } from "../../lib/queries/showQueries";
 import { NotFoundException } from "../../exceptions/NotFoundException";
-import { ShowResponse } from "../shows/types/ShowResponse";
+import { ShowRepository } from "../../repositories/ShowRepository";
+import { DetailedShowResponse } from "../../types/show/DetailedShowResponse";
 
 interface Param {
   id: number;
 }
 
 export class GetShowInfo extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/:id', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/:id', emitter);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -22,11 +22,11 @@ export class GetShowInfo extends GetEndpoint {
     ]
   }
 
-  protected async execute(data: RequestData<unknown, unknown, Param>): Promise<ShowResponse> {
-    const show = await findShowByIdWithMetadata(this.repository, data.params.id);
+  protected async execute(data: RequestData<unknown, unknown, Param>): Promise<DetailedShowResponse> {
+    const show = await ShowRepository.findById(data.params.id);
     if (show === null) {
       throw new NotFoundException('Show not found');
     }
-    return normalizeShow(show);
+    return normalizeDetailedShow(show);
   }
 }

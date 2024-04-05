@@ -2,10 +2,9 @@ import { EventEmitter } from 'events';
 import { ValidationChain, query } from "express-validator";
 import { GetEndpoint } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
-import { RepositoryManager } from '../../../lib/repository';
-import { ImageType } from '@prisma/client';
-import { MovieResponse } from '../types/MovieResponse';
-import { listPopularMoviesWithMetadata, normalizeMovies } from '../../../lib/queries/movieQueries';
+import { normalizeBasicMovies } from '../../../lib/queries/movieQueries';
+import { MovieRepository } from '../../../repositories/MovieRepository';
+import { BasicMovieResponse } from '../../../types/movie/BasicMovieResponse';
 
 enum OrderBy {
   ADDED_DATE = 'addedDate'
@@ -18,8 +17,8 @@ interface QueryParams {
 }
 
 export class ListPopularMoviesEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/list/popular', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/list/popular', emitter);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -29,8 +28,8 @@ export class ListPopularMoviesEndpoint extends GetEndpoint {
       query('offset', 'How many records to skip').default(0).isInt({ min: 0 }).toInt()
     ]
   }
-  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<MovieResponse[]> {
-    const movies = await listPopularMoviesWithMetadata(this.repository, data.query.limit, data.query.offset);
-    return normalizeMovies(movies);
+  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<BasicMovieResponse[]> {
+    const movies = await MovieRepository.findPopular(data.query.limit, data.query.offset);
+    return normalizeBasicMovies(movies);
   }
 }

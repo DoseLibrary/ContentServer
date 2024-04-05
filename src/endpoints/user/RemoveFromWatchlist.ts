@@ -2,15 +2,16 @@ import { EventEmitter } from 'events';
 import { ValidationChain, query } from "express-validator";
 import { DeleteEndpoint } from "../../lib/Endpoint";
 import { RequestData } from "../../types/RequestData";
-import { RepositoryManager } from '../../lib/repository';
+import { UserRepository } from '../../repositories/UserRepository';
+import { NotFoundException } from '../../exceptions/NotFoundException';
 
 interface QueryParams {
   id: number;
 }
 
 export class RemoveFromWatchlistEndpoint extends DeleteEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/watchlist', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/watchlist', emitter);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -19,6 +20,14 @@ export class RemoveFromWatchlistEndpoint extends DeleteEndpoint {
     ]
   }
   protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<void> {
-    await this.repository.user.removeFromWatchlist(data.userId, data.query.id);
+    const { id: movieId } = data.query;
+    const user = await UserRepository.findOneById(data.userId, {
+      relations: ['watchlistMovies']
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    user.watchlistMovies = user.watchlistMovies.filter(movie => movie.id !== movieId);
+    await UserRepository.save(user);
   }
 }

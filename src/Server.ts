@@ -1,5 +1,7 @@
+import "reflect-metadata"
 import { PrismaClient } from '@prisma/client'
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
+import compression from 'compression';
 import cors from 'cors';
 import http, { Server as HttpServer } from 'http';
 import { Server as IOServer } from 'socket.io';
@@ -10,7 +12,6 @@ import { RouterPath } from './types/RouterPath';
 import HttpException from './exceptions/HttpException';
 import { createMoviesEndpoints } from './endpoints/movies';
 import { Watcher } from './lib/Watcher';
-import { RepositoryManager, createRepositories } from './lib/repository';
 import { createAuthEndpoints } from './endpoints/auth';
 import { Job } from './lib/job/Job';
 import { PopularMovieJob } from './lib/job/PopularMovieJob';
@@ -28,6 +29,13 @@ import { createShowEndpoints } from './endpoints/show';
 import { ExtractSubtitlesJob } from './lib/job/ExtractSubtitlesJob';
 import { createSearchEndpoints } from './endpoints/search';
 import { createDashboardEndpoints } from './endpoints/setup';
+import { Log } from './lib/Logger';
+import { AppDataSource } from "./DataSource";
+import { MovieRepository } from "./repositories/MovieRepository";
+import { ShowRepository } from "./repositories/ShowRepository";
+import { SeasonRepository } from "./repositories/SeasonRepository";
+import { EpisodeRepository } from "./repositories/EpisodeRepository";
+import { LibraryRepository } from "./repositories/LibraryRepository";
 
 export class Server {
   private app: Express;
@@ -35,7 +43,6 @@ export class Server {
   private io: IOServer;
   private config: Config;
   private watcher: Watcher;
-  private repository: RepositoryManager;
   private jobs: Job[];
   private emitter: EventEmitter;
 
@@ -50,42 +57,32 @@ export class Server {
     const configPath = path.join(process.env.TEMP_DIRECTORY || '', 'config.json');
     this.config = new Config(configPath);
     transcodingManager.setConfig(this.config);
-    this.repository = createRepositories(new PrismaClient(), this.config);
-    this.watcher = new Watcher(this.repository);
+    this.watcher = new Watcher();
   }
+
 
   private initializePublicAPIEndpoints() {
     const endpoints: RouterPath[] = [
-      createPingEndpoints(this.config, this.emitter, this.repository),
-      createImageEndpoints(this.config, this.emitter, this.repository),
-      createAuthEndpoints(this.config, this.emitter, this.repository),
-      createMoviesEndpoints(this.config, this.emitter, this.repository),
-      createMovieEndpoints(this.config, this.emitter, this.repository),
-      createGenreEndpoints(this.config, this.emitter, this.repository),
-      createShowsEndpoints(this.config, this.emitter, this.repository),
-      createShowEndpoints(this.config, this.emitter, this.repository),
-      createUserEndpoints(this.config, this.emitter, this.repository),
-      createVideoEndpoints(this.config, this.emitter, this.repository),
-      createMetadataEndpoints(this.config, this.emitter, this.repository),
-      createSearchEndpoints(this.config, this.emitter, this.repository)
+      createPingEndpoints(this.config, this.emitter),
+      createImageEndpoints(this.config, this.emitter),
+      createAuthEndpoints(this.config, this.emitter),
+      createMoviesEndpoints(this.config, this.emitter),
+      createMovieEndpoints(this.config, this.emitter),
+      createGenreEndpoints(this.config, this.emitter),
+      createShowsEndpoints(this.config, this.emitter),
+      createShowEndpoints(this.config, this.emitter),
+      createUserEndpoints(this.config, this.emitter),
+      createVideoEndpoints(this.config, this.emitter),
+      createMetadataEndpoints(this.config, this.emitter),
+      createSearchEndpoints(this.config, this.emitter)
     ];
     const apiRouter = Router();
     endpoints.forEach(({ router, path }) => apiRouter.use(path, router));
     this.app.use('/api', apiRouter);
   }
 
-
-  private initializeSetupAPIEndpoints() {
-    console.log('init debug');
-    const dashboardEndpoints: RouterPath[] = [
-      createDashboardEndpoints(this.config, this.emitter, this.repository)
-    ];
-    const dashboardRouter = Router();
-    dashboardEndpoints.forEach(({ router, path }) => dashboardRouter.use(path, router));
-    this.app.use('/api/setup', dashboardRouter);
-  }
-
   private setupMiddlewares() {
+    this.app.use(compression());
     this.app.use(cors());
     this.app.use(express.json());
   }
@@ -116,22 +113,32 @@ export class Server {
   }
 
   private setupJobs() {
+    /*
     this.jobs.push(
       new PopularMovieJob(this.repository),
       new ScanForTrailerJob(this.repository),
       new ExtractSubtitlesJob(this.repository, this.emitter)
     );
     this.jobs.map(job => job.start());
+    */
+  }
+
+  private async syncDatabase() {
+    Log.info('Syncing database..');
+    await LibraryRepository.sync();
+    await MovieRepository.sync();
+    await ShowRepository.sync();
+    await SeasonRepository.sync();
+    await EpisodeRepository.sync();
+    Log.info('Database sync complete!');
   }
 
   async start(port: number) {
-    if (this.config.setupComplete) {
-      this.initializePublicAPIEndpoints();
-      this.watcher.start(this.emitter);
-      this.setupJobs();
-    } else {
-      this.initializeSetupAPIEndpoints();
-    }
+    await AppDataSource.initialize();
+    await this.syncDatabase();
+    this.initializePublicAPIEndpoints();
+    this.watcher.start(this.emitter);
+    this.setupJobs();
     this.setupErrorHandling();
 
     this.server.listen(port);

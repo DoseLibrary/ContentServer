@@ -1,11 +1,11 @@
 import { EventEmitter } from "events";
 import { GetEndpoint } from "../../lib/Endpoint";
-import { RepositoryManager } from "../../lib/repository";
 import { ValidationChain, param } from "express-validator";
 import { RequestData } from "../../types/RequestData";
-import { EpisodeResponse } from "../shows/types/EpisodeResponse";
-import { getEpisodeWithMetadata, normalizeEpisode } from "../../lib/queries/episodeQueries";
+import { normalizeDetailedEpisode } from "../../lib/queries/episodeQueries";
 import { NotFoundException } from "../../exceptions/NotFoundException";
+import { EpisodeRepository } from "../../repositories/EpisodeRepository";
+import { DetailedEpisodeResponse } from "../../types/episode/DetailedEpisodeResponse";
 
 interface Param {
   showId: number;
@@ -14,8 +14,9 @@ interface Param {
 }
 
 export class GetEpisodeInfo extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/:showId/season/:seasonNumber/episode/:episodeNumber', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/:showId/season/:seasonNumber/episode/:episodeNumber', emitter);
+    this.setAuthRequired(false);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -26,12 +27,14 @@ export class GetEpisodeInfo extends GetEndpoint {
     ];
   }
 
-  protected async execute(data: RequestData<unknown, unknown, Param>): Promise<EpisodeResponse> {
+  protected async execute(data: RequestData<unknown, unknown, Param>): Promise<DetailedEpisodeResponse> {
     const { showId, seasonNumber, episodeNumber } = data.params;
-    const episode = await getEpisodeWithMetadata(this.repository, showId, seasonNumber, episodeNumber);
+    const episode = await EpisodeRepository.findOneByEpisodeInSeason(showId, seasonNumber, episodeNumber, {
+      relations: ['season', 'season.show', 'season.metadata', 'season.show.metadata']
+    });
     if (!episode) {
       throw new NotFoundException('Episode not found');
     }
-    return normalizeEpisode(episode);
+    return normalizeDetailedEpisode(episode);
   }
 }

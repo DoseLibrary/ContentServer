@@ -1,11 +1,11 @@
 import { EventEmitter } from "events";
 import { ValidationChain, param } from "express-validator";
 import { GetEndpoint } from "../../lib/Endpoint";
-import { RepositoryManager } from "../../lib/repository";
 import { RequestData } from "../../types/RequestData";
-import { getSeasonInfoWithMetadata, normalizeSeason } from "../../lib/queries/seasonQueries";
-import { SeasonResponse } from "../shows/types/SeasonResponse";
+import { normalizeDetailedSeason } from "../../lib/queries/seasonQueries";
 import { NotFoundException } from "../../exceptions/NotFoundException";
+import { SeasonRepository } from "../../repositories/SeasonRepository";
+import { DetailedSeasonResponse } from "../../types/season/DetailedSeasonResponse";
 
 interface Param {
   showId: number;
@@ -13,8 +13,9 @@ interface Param {
 }
 
 export class GetSeasonInfo extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/:showId/season/:seasonNumber', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/:showId/season/:seasonNumber', emitter);
+    this.setAuthRequired(false);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -24,13 +25,14 @@ export class GetSeasonInfo extends GetEndpoint {
     ]
   }
 
-  protected async execute(data: RequestData<unknown, unknown, Param>): Promise<SeasonResponse> {
+  protected async execute(data: RequestData<unknown, unknown, Param>): Promise<DetailedSeasonResponse> {
     const { showId, seasonNumber } = data.params;
-
-    const season = await getSeasonInfoWithMetadata(this.repository, showId, seasonNumber);
+    const season = await SeasonRepository.findOneBySeasonInShow(showId, seasonNumber, {
+      relations: ['show', 'show.metadata']
+    });
     if (season === null) {
       throw new NotFoundException('Season not found');
     }
-    return normalizeSeason(season);
+    return normalizeDetailedSeason(season);
   }
 }

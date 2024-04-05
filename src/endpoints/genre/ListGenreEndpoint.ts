@@ -1,14 +1,11 @@
 import { EventEmitter } from 'events';
 import { GetEndpoint } from "../../lib/Endpoint";
 import { ValidationChain } from 'express-validator';
-import { RepositoryManager } from '../../lib/repository';
-interface ListGenreResponse {
-  genres: string[]
-}
+import { GenreRepository } from '../../repositories/GenreRepository';
 
 export class ListGenreEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, db: RepositoryManager) {
-    super('/list', emitter, db);
+  constructor(emitter: EventEmitter) {
+    super('/list', emitter);
   }
 
   public getValidator(): ValidationChain[] {
@@ -16,7 +13,7 @@ export class ListGenreEndpoint extends GetEndpoint {
   }
 
   async execute() {
-    const genres = await this.repository.genre.list();
+    const genres = await GenreRepository.find();
     return genres.map(genres => genres.name);
   }
 }

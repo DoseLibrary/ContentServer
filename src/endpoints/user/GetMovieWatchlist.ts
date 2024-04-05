@@ -2,10 +2,10 @@ import { EventEmitter } from 'events';
 import { ValidationChain, query } from "express-validator";
 import { GetEndpoint } from "../../lib/Endpoint";
 import { RequestData } from "../../types/RequestData";
-import { RepositoryManager } from '../../lib/repository';
-import { MovieResponse } from '../movies/types/MovieResponse';
-import { getUserWatchlist } from '../../lib/queries/userQueries';
-import { normalizeMovies } from '../../lib/queries/movieQueries';
+import { UserRepository } from '../../repositories/UserRepository';
+import { NotFoundException } from '../../exceptions/NotFoundException';
+import { normalizeBasicMovies } from '../../lib/queries/movieQueries';
+import { BasicMovieResponse } from '../../types/movie/BasicMovieResponse';
 
 interface QueryParams {
   limit: number;
@@ -13,8 +13,8 @@ interface QueryParams {
 }
 
 export class GetMovieWatchlist extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/watchlist', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/watchlist', emitter);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -23,8 +23,13 @@ export class GetMovieWatchlist extends GetEndpoint {
       query('offset', 'How many records to skip').isInt({ min: 0 }).optional().default(0)
     ]
   }
-  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<MovieResponse[]> {
-    const movies = await getUserWatchlist(this.repository, data.userId, data.query.limit, data.query.offset);
-    return normalizeMovies(movies);
+  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<BasicMovieResponse[]> {
+    const user = await UserRepository.findOneById(data.userId, {
+      relations: ['watchlistMovies']
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return normalizeBasicMovies(user.watchlistMovies);
   }
 }

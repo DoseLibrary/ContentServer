@@ -1,73 +1,28 @@
-import { ImageType } from "@prisma/client";
-import { SeasonResponse } from "../../endpoints/shows/types/SeasonResponse";
-import { RepositoryManager } from "../repository";
 import { cleanDate } from "../../util/date";
+import { Season } from "../../models/Season";
+import { ImageType } from "../../models/Image";
+import { DetailedSeasonResponse } from "../../types/season/DetailedSeasonResponse";
 
-export const getSeasonInfoWithMetadata = (repository: RepositoryManager, showId: number, seasonNumber: number) => {
-  return repository.season.findBySeasonInShow(seasonNumber, showId, {
-    seasonMetadata: {
-      include: {
-        images: {
-          select: {
-            id: true,
-            type: true
-          }
-        }
-      }
-    },
-    episodes: {
-      include: {
-        metadata: {
-          include: {
-            images: {
-              select: {
-                id: true,
-                type: true
-              }
-            }
-          }
-        }
-      }
-    },
-    show: {
-      include: {
-        showMetadata: {
-          include: {
-            images: {
-              select: {
-                id: true,
-                type: true
-              }
-            }
-          }
-        }
-      }
-    }
-  })
-}
-
-export const normalizeSeason = (season: Awaited<ReturnType<typeof getSeasonInfoWithMetadata>>): SeasonResponse => {
-  if (!season) {
-    throw new Error('Season was null');
-  }
+export const normalizeDetailedSeason = (season: Season): DetailedSeasonResponse => {
   return {
-    addedDate: cleanDate(season?.addedDate),
-    airDate: cleanDate(season?.seasonMetadata?.airDate),
-    season: season?.seasonMetadata?.seasonNumber || season?.seasonNumber,
-    title: season?.seasonMetadata?.name,
-    backdropId: season?.seasonMetadata?.images?.find(image => image.type === ImageType.BACKDROP)?.id ||
-      season?.show?.showMetadata?.images?.find(image => image.type === ImageType.BACKDROP)?.id,
-    posterId: season?.seasonMetadata?.images?.find(image => image.type === ImageType.POSTER)?.id ||
-      season?.show?.showMetadata?.images?.find(image => image.type === ImageType.POSTER)?.id,
-    overview: season?.seasonMetadata?.overview,
-    episodes: season?.episodes.map(episode => ({
+    addedDate: cleanDate(season.addedDate),
+    airDate: cleanDate(season.metadata?.airDate),
+    season: season.metadata?.seasonNumber || season.seasonNumber,
+    title: season.metadata?.title,
+    backdropId: season.metadata?.images?.find(image => image.type === ImageType.BACKDROP)?.id ||
+      season.show.metadata?.images?.find(image => image.type === ImageType.BACKDROP)?.id,
+    posterId: season.metadata?.images?.find(image => image.type === ImageType.POSTER)?.id ||
+      season.show.metadata?.images?.find(image => image.type === ImageType.POSTER)?.id,
+    overview: season.metadata?.overview,
+    episodes: season.episodes.map(episode => ({
       episode: episode.episodeNumber,
       backdropId: episode.metadata?.images.find(image => image.type === ImageType.BACKDROP)?.id,
       overview: episode.metadata?.overview,
-      title: episode.metadata?.name
+      title: episode.metadata?.title,
     })),
     show: {
-      title: season.show.showMetadata?.title || season.show.name
+      id: season.show.id,
+      title: season.show.metadata?.title || season.show.name
     }
   }
 }

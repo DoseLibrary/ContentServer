@@ -2,10 +2,10 @@ import { EventEmitter } from 'events';
 import { ValidationChain, query } from "express-validator";
 import { GetEndpoint } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
-import { RepositoryManager } from '../../../lib/repository';
-import { MovieResponse } from '../../movies/types/MovieResponse';
-import { listOngoingMovies } from '../../../lib/queries/userQueries';
-import { normalizeMovies } from '../../../lib/queries/movieQueries';
+import { normalizeBasicMovie } from '../../../lib/queries/movieQueries';
+import { UserOngoingMovieRepository } from '../../../repositories/UserOngoingMovieRepository';
+import { BasicMovieWithUserProgressResponse } from '../../../types/movie/BasicMovieResponse';
+import { cleanDate } from '../../../util/date';
 
 interface QueryParams {
   limit: number;
@@ -13,8 +13,8 @@ interface QueryParams {
 }
 
 export class ListOngoingMovies extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/ongoing/movies', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/ongoing/movies', emitter);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -23,8 +23,15 @@ export class ListOngoingMovies extends GetEndpoint {
       query('offset', 'How many records to skip').default(0).isInt({ min: 0 }).toInt()
     ]
   }
-  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<MovieResponse[]> {
-    const movies = await listOngoingMovies(this.repository, data.userId, data.query.limit, data.query.offset);
-    return normalizeMovies(movies);
+  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<BasicMovieWithUserProgressResponse[]> {
+    const entities = await UserOngoingMovieRepository.findOngoingMoviesByUserId(data.userId, {
+      take: data.query.limit,
+      skip: data.query.offset
+    });
+    return entities.map(entity => ({
+      ...normalizeBasicMovie(entity.movie),
+      progress: entity.time,
+      lastWatched: cleanDate(entity.lastWatched),
+    }));
   }
 }

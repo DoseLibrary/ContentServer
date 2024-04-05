@@ -2,12 +2,10 @@ import { EventEmitter } from 'events';
 import { ValidationChain, query } from "express-validator";
 import { GetEndpoint } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
-import { RepositoryManager } from '../../../lib/repository';
-import { ImageType } from '@prisma/client';
-import { EpisodeResponse } from '../../shows/types/EpisodeResponse';
-import { listOngoingEpisodes } from '../../../lib/queries/userQueries';
-import { off } from 'process';
-import { normalizeEpisodes } from '../../../lib/queries/episodeQueries';
+import { normalizeBasicEpisode } from '../../../lib/queries/episodeQueries';
+import { UserOngoingEpisodeRepository } from '../../../repositories/UserOngoingEpisodeRepository';
+import { BasicEpisodeWithUserProgressResponse } from '../../../types/episode/BasicEpisodeResponse';
+import { cleanDate } from '../../../util/date';
 
 interface QueryParams {
   limit: number;
@@ -15,8 +13,8 @@ interface QueryParams {
 }
 
 export class ListOngoingEpisodes extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/ongoing/episodes', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/ongoing/episodes', emitter);
     this.setAuthRequired(false);
   }
 
@@ -26,9 +24,17 @@ export class ListOngoingEpisodes extends GetEndpoint {
       query('offset', 'How many records to skip').default(0).isInt({ min: 0 }).toInt()
     ]
   }
-  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<EpisodeResponse[]> {
+  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<BasicEpisodeWithUserProgressResponse[]> {
     const { limit, offset } = data.query;
-    const episodes = await listOngoingEpisodes(this.repository, data.userId, limit, offset);
-    return normalizeEpisodes(episodes);
+    const entities = await UserOngoingEpisodeRepository.findOngoingEpisodesByUserId(data.userId, {
+      take: limit,
+      skip: offset,
+      relations: ['episode', 'episode.season', 'episode.season.show', 'episode.season.metadata', 'episode.season.show.metadata']
+    });
+    return entities.map(entity => ({
+      ...normalizeBasicEpisode(entity.episode),
+      progress: entity.time,
+      lastWatched: cleanDate(entity.lastWatched)
+    }));
   }
 }

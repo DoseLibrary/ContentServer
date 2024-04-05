@@ -2,45 +2,32 @@ import { EventEmitter } from 'events';
 import { ValidationChain, param, query } from "express-validator";
 import { GetEndpoint, ResponseHeaders, ResponseType } from "../../lib/Endpoint";
 import { RequestData } from "../../types/RequestData";
-import { RepositoryManager } from '../../lib/repository';
-import { getMoviePathById } from '../../lib/queries/movieQueries';
-import { NotFoundException } from '../../exceptions/NotFoundException';
 import fs from 'fs';
 import stream from 'stream';
-import { getEpisodePathById } from '../../lib/queries/episodeQueries';
+import { MovieRepository } from '../../repositories/MovieRepository';
+import { EpisodeRepository } from '../../repositories/EpisodeRepository';
 
-enum Type {
-  MOVIE = 'movie',
-  EPISODE = 'episode'
-}
-
-interface Param {
+interface MovieParam {
   id: number;
 }
-interface Query {
-  type: Type;
-}
 
-// TODO: Support episodes here as well. Episodes needs an ID.
-export class DirectplayEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/:id/directplay', emitter, repository);
+interface EpisodeParam {
+  showId: number;
+  seasonNumber: number;
+  episodeNumber: number;
+};
+
+abstract class DirectplayEndpoint extends GetEndpoint {
+  constructor(reqPath: string, emitter: EventEmitter) {
+    super(reqPath, emitter);
     this.setResponseType(ResponseType.STREAM);
   }
 
-  protected getValidator(): ValidationChain[] {
-    return [
-      param('id').isInt({ min: 0 }).toInt(),
-      query('type').isIn(Object.values(Type))
-    ]
-  }
+  protected abstract getPath(param: MovieParam | EpisodeParam): Promise<string>;
 
   // Not so good, we query the db and stat the file twice. Once for headers, once for the data
-  protected async headers(data: RequestData<unknown, Query, Param>): Promise<ResponseHeaders> {
-    const { type } = data.query;
-    const { id } = data.params;
-
-    const path = type === Type.MOVIE ? await this.getMoviePath(id) : await this.getEpisodePath(id);
+  protected async headers(data: RequestData<unknown, unknown, MovieParam | EpisodeParam>): Promise<ResponseHeaders> {
+    const path = await this.getPath(data.params);
     const size = await this.getFileSize(path);
 
     const range = data.headers.range || 'bytes=0-';
@@ -62,11 +49,8 @@ export class DirectplayEndpoint extends GetEndpoint {
     };
   }
 
-  protected async execute(data: RequestData<unknown, Query, Param>): Promise<stream> {
-    const { type } = data.query;
-    const { id } = data.params;
-
-    const path = type === Type.MOVIE ? await this.getMoviePath(id) : await this.getEpisodePath(id);
+  protected async execute(data: RequestData<unknown, unknown, MovieParam | EpisodeParam>): Promise<stream> {
+    const path = await this.getPath(data.params);
     const size = await this.getFileSize(path);
 
     const range = data.headers.range || 'bytes=0-';
@@ -81,20 +65,38 @@ export class DirectplayEndpoint extends GetEndpoint {
     return fs.promises.stat(filePath)
       .then(stats => stats.size);
   }
+}
 
-  private async getMoviePath(id: number) {
-    const moviePath = await getMoviePathById(this.repository, id);
-    if (!moviePath) {
-      throw new NotFoundException('Movie not found');
-    }
-    return moviePath;
+export class MovieDirectplayEndpoint extends DirectplayEndpoint {
+  constructor(emitter: EventEmitter) {
+    super('/movie/:id/directplay', emitter);
   }
 
-  private async getEpisodePath(id: number) {
-    const episodePath = await getEpisodePathById(this.repository, id);
-    if (!episodePath) {
-      throw new NotFoundException('Episode not found');
-    }
-    return episodePath;
+  protected getValidator(): ValidationChain[] {
+    return [
+      param('id').isInt({ min: 0 }).toInt(),
+    ]
+  }
+
+  protected getPath(data: MovieParam): Promise<string> {
+    return MovieRepository.getMoviePathById(data.id);
+  }
+}
+
+export class EpisodeDirectplayEndpoint extends DirectplayEndpoint {
+  constructor(emitter: EventEmitter) {
+    super('/show/:showId/season/:seasonNumber/episode/:episodeNumber/directplay', emitter);
+  }
+
+  protected getValidator(): ValidationChain[] {
+    return [
+      param('showId').isInt({ min: 0 }).toInt(),
+      param('seasonNumber').isInt({ min: 0 }).toInt(),
+      param('episodeNumber').isInt({ min: 0 }).toInt(),
+    ]
+  }
+
+  protected getPath(data: EpisodeParam): Promise<string> {
+    return EpisodeRepository.getEpisodePath(data.showId, data.seasonNumber, data.episodeNumber);
   }
 }

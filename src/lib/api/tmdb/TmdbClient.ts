@@ -1,5 +1,13 @@
 const API_URL = "https://api.themoviedb.org/3";
 
+type BaseTmdbResponse = {
+  success: boolean;
+};
+
+const isBaseTmdbResponse = (data: any): data is BaseTmdbResponse => {
+  return data.success !== undefined;
+};
+
 export abstract class TmdbClient {
   private apiKey: string;
 
@@ -17,10 +25,10 @@ export abstract class TmdbClient {
     return fetch(encodeURI(url))
       .then(res => res.json())
       .then(data => {
-        if (data.success === false) {
+        if ((data as BaseTmdbResponse).success === false) {
           throw new Error(JSON.stringify(data));
         }
-        return data;
+        return data as BaseTmdbResponse & T;
       })
   }
 }

@@ -2,18 +2,18 @@ import { EventEmitter } from 'events';
 import { ValidationChain, query } from "express-validator";
 import { GetEndpoint } from "../../lib/Endpoint";
 import { RequestData } from "../../types/RequestData";
-import { RepositoryManager } from '../../lib/repository';
-import { MovieResponse } from './types/MovieResponse';
 import { NotFoundException } from '../../exceptions/NotFoundException';
-import { findMovieByIdWithMetadata, normalizeMovie } from '../../lib/queries/movieQueries';
+import { MovieRepository } from '../../repositories/MovieRepository';
+import { normalizeDetailedMovie } from '../../lib/queries/movieQueries';
+import { DetailedMovieResponse } from '../../types/movie/DetailedMovieResponse';
 
 interface QueryParams {
   requireTrailer: boolean;
 }
 
 export class GetRandomMovieEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/random', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/random', emitter);
     this.setAuthRequired(false);
   }
 
@@ -22,26 +22,24 @@ export class GetRandomMovieEndpoint extends GetEndpoint {
       query('requireTrailer').default(false).isBoolean().toBoolean()
     ]
   }
-  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<MovieResponse> {
-    const movies = await this.getMovies(data.query.requireTrailer);
-    const randomId = movies[Math.floor(Math.random() * movies.length)]?.id;
-    const movie = await findMovieByIdWithMetadata(this.repository, randomId);
-    if (randomId === undefined || movie === null) {
+  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<DetailedMovieResponse> {
+    const movie = await this.getRandomMovie(data.query.requireTrailer);
+    if (movie === null) {
       throw new NotFoundException('No movies with trailers found');
     }
-    return normalizeMovie(movie);
+    return normalizeDetailedMovie(movie);
   }
 
-  private getMovies(requireTrailer: boolean) {
+  private getRandomMovie(requireTrailer: boolean) {
+    const queryBuilder = MovieRepository.createQueryBuilder('movie')
+      .orderBy('RANDOM()')
+      .limit(1)
+      .leftJoinAndSelect('movie.metadata', 'metadata')
+      .leftJoinAndSelect('metadata.genres', 'genres')
+      .leftJoinAndSelect('metadata.images', 'images')
     if (requireTrailer) {
-      return this.repository.movie.list({
-        where: {
-          NOT: {
-            trailerPath: null
-          }
-        },
-      });
+      queryBuilder.where('trailerPath IS NOT NULL')
     }
-    return this.repository.movie.list();
+    return queryBuilder.getOne();
   }
 }

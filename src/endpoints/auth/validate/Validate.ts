@@ -3,7 +3,7 @@ import { PostEndpoint } from "../../../lib/Endpoint";
 import { EventEmitter } from 'events';
 import { signJwt } from '../../../util/security';
 import { RequestData } from '../../../types/RequestData';
-import { RepositoryManager } from '../../../lib/repository';
+import { UserRepository } from '../../../repositories/UserRepository';
 
 interface ValidateResult {
   status: string
@@ -24,8 +24,8 @@ const isMainServerResponse = (obj: unknown): obj is MainServerResponse => {
 }
 
 export class ValidateEndpoint extends PostEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/', emitter);
     this.setAuthRequired(false);
   }
 
@@ -55,7 +55,7 @@ export class ValidateEndpoint extends PostEndpoint {
         }
         return data;
       })
-      .then(data => this.getUserByUsername(data.username))
+      .then(data => UserRepository.findOneByUsername(data.username))
       .then(user => {
         if (user === null) {
           throw new Error('User not found');
@@ -78,11 +78,4 @@ export class ValidateEndpoint extends PostEndpoint {
         };
       })
   }
-
-  private async getUserByUsername(username: string) {
-    return this.repository.user.findByUsername(username);
-  }
-}
-
-class abc {
 }

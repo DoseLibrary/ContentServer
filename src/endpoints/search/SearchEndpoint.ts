@@ -1,18 +1,19 @@
 import { EventEmitter } from "events";
-import { RepositoryManager } from "../../lib/repository";
 import { GetEndpoint } from "../../lib/Endpoint";
 import { ValidationChain, query } from "express-validator";
 import { RequestData } from "../../types/RequestData";
-import { listMoviesByTitleWithMetadata, normalizeMovies } from "../../lib/queries/movieQueries";
-import { listShowsByTitleWithMetadata, normalizeShows } from "../../lib/queries/showQueries";
+import { normalizeBasicShows } from "../../lib/queries/showQueries";
+import { MovieRepository } from "../../repositories/MovieRepository";
+import { ShowRepository } from "../../repositories/ShowRepository";
+import { normalizeBasicMovies } from "../../lib/queries/movieQueries";
 
 interface Query {
   query: string;
 }
 
 export class SearchEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/', emitter);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -23,11 +24,11 @@ export class SearchEndpoint extends GetEndpoint {
 
   protected async execute(data: RequestData<unknown, Query, unknown>): Promise<unknown> {
     const { query } = data.query;
-    const movies = await listMoviesByTitleWithMetadata(this.repository, query);
-    const shows = await listShowsByTitleWithMetadata(this.repository, query);
+    const movies = await MovieRepository.findByTitle(query);
+    const shows = await ShowRepository.findByTitle(query);
     return {
-      movies: normalizeMovies(movies),
-      shows: normalizeShows(shows)
+      movies: normalizeBasicMovies(movies),
+      shows: normalizeBasicShows(shows)
     }
   }
 }

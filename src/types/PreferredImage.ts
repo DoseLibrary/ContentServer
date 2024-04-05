@@ -1,7 +1,7 @@
-import { ImageType } from "@prisma/client";
+import { ImageType } from "../models/Image";
 
 export type PreferredImage = {
-  path: string;
+  data: string;
   preferred: boolean;
   type: ImageType;
   externalId?: number;

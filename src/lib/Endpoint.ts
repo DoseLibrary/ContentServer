@@ -2,12 +2,9 @@ import { EventEmitter } from 'events';
 import { Router, Request, Response, NextFunction } from 'express';
 import { ValidationChain, ValidationError, validationResult } from 'express-validator';
 import { Config } from './Config';
-import { Database } from './db/Database';
 import { isAuthorized } from '../middlewares/AuthMiddleware';
 import { BadRequestException } from '../exceptions/BadRequestException';
 import { RequestData } from '../types/RequestData';
-import { PrismaClient } from '@prisma/client';
-import { RepositoryManager } from './repository';
 import { isString } from '../util/string';
 import stream from 'stream';
 import { Log } from './Logger';
@@ -34,7 +31,6 @@ export interface ResponseHeaders {
 
 abstract class Endpoint {
   protected config: Config;
-  protected repository: RepositoryManager;
   protected emitter: EventEmitter;
 
   private authRequired: boolean = true;
@@ -42,11 +38,10 @@ abstract class Endpoint {
   private type: EndpointType;
   private responseType: ResponseType = ResponseType.JSON;
 
-  constructor(path: string, emitter: EventEmitter, type: EndpointType, repository: RepositoryManager) {
+  constructor(path: string, emitter: EventEmitter, type: EndpointType) {
     this.path = path;
     this.emitter = emitter;
     this.type = type;
-    this.repository = repository;
   }
 
   public setupEndpoint(router: Router, config: Config) {
@@ -192,25 +187,25 @@ abstract class Endpoint {
 
 // Overide execute here, should not get reqbody
 export abstract class GetEndpoint extends Endpoint {
-  constructor(path: string = '/', emitter: EventEmitter, repository: RepositoryManager) {
-    super(path, emitter, EndpointType.GET, repository);
+  constructor(path: string = '/', emitter: EventEmitter) {
+    super(path, emitter, EndpointType.GET);
   }
 }
 
 export abstract class PostEndpoint extends Endpoint {
-  constructor(path: string = '/', emitter: EventEmitter, repository: RepositoryManager) {
-    super(path, emitter, EndpointType.POST, repository);
+  constructor(path: string = '/', emitter: EventEmitter) {
+    super(path, emitter, EndpointType.POST);
   }
 }
 
 export abstract class DeleteEndpoint extends Endpoint {
-  constructor(path: string = '/', emitter: EventEmitter, repository: RepositoryManager) {
-    super(path, emitter, EndpointType.DELETE, repository);
+  constructor(path: string = '/', emitter: EventEmitter) {
+    super(path, emitter, EndpointType.DELETE);
   }
 }
 
 export abstract class PutEndpoint extends Endpoint {
-  constructor(path: string = '/', emitter: EventEmitter, repository: RepositoryManager) {
-    super(path, emitter, EndpointType.PUT, repository);
+  constructor(path: string = '/', emitter: EventEmitter) {
+    super(path, emitter, EndpointType.PUT);
   }
 }

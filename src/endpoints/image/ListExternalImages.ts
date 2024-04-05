@@ -1,11 +1,11 @@
 import { EventEmitter } from "events";
 import { GetEndpoint } from "../../lib/Endpoint";
-import { RepositoryManager } from "../../lib/repository";
 import { ValidationChain, param } from "express-validator";
-import { ImageClient, ImageCollection } from "../../lib/api/ImageClient";
+import { ImageCollection } from "../../lib/api/ImageClient";
 import { TmdbImageClient } from "../../lib/api/tmdb/TmdbImageClient";
 import { RequestData } from "../../types/RequestData";
 import { NotFoundException } from "../../exceptions/NotFoundException";
+import { MovieRepository } from "../../repositories/MovieRepository";
 
 enum Type {
   MOVIE = 'movie',
@@ -23,8 +23,8 @@ interface Param {
 export class ListExternalImagesEndpoint extends GetEndpoint {
   private imageClient: TmdbImageClient;
 
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/list/:type/:id/external', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/list/:type/:id/external', emitter);
     this.imageClient = new TmdbImageClient('19065a8218d4c104a51afcc3e2a9b971');
     this.setAuthRequired(false);
   }
@@ -41,7 +41,7 @@ export class ListExternalImagesEndpoint extends GetEndpoint {
     if (type !== Type.MOVIE) {
       throw new Error('Only movies are supported');
     }
-    const movie = await this.repository.movie.findById(id);
+    const movie = await MovieRepository.findOneById(id);
     if (!movie) {
       throw new NotFoundException('Movie not found');
     }

@@ -2,10 +2,9 @@ import { EventEmitter } from 'events';
 import { ValidationChain, query } from "express-validator";
 import { GetEndpoint } from "../../../lib/Endpoint";
 import { RequestData } from "../../../types/RequestData";
-import { RepositoryManager } from '../../../lib/repository';
-import { ImageType } from '@prisma/client';
-import { MovieResponse } from '../types/MovieResponse';
-import { MovieOrderBy, MovieOrderByOptions, listMoviesWithMetadata, normalizeMovies } from '../../../lib/queries/movieQueries';
+import { MovieOrderBy, MovieOrderByOptions, normalizeBasicMovies } from '../../../lib/queries/movieQueries';
+import { MovieRepository } from '../../../repositories/MovieRepository';
+import { BasicMovieResponse } from '../../../types/movie/BasicMovieResponse';
 
 interface QueryParams {
   orderBy: MovieOrderBy;
@@ -14,8 +13,8 @@ interface QueryParams {
 }
 
 export class ListAllMoviesEndpoint extends GetEndpoint {
-  constructor(emitter: EventEmitter, repository: RepositoryManager) {
-    super('/list', emitter, repository);
+  constructor(emitter: EventEmitter) {
+    super('/list', emitter);
   }
 
   protected getValidator(): ValidationChain[] {
@@ -25,13 +24,20 @@ export class ListAllMoviesEndpoint extends GetEndpoint {
       query('offset').default(0).isInt({ min: 0 }).toInt()
     ]
   }
-  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<MovieResponse[]> {
+
+  protected async execute(data: RequestData<unknown, QueryParams, unknown>): Promise<BasicMovieResponse[]> {
     const { limit, offset } = data.query;
     const orderBy: MovieOrderByOptions = {
       field: data.query.orderBy,
       dir: 'desc'
     }
-    const movies = await listMoviesWithMetadata(this.repository, orderBy, limit, offset);
-    return normalizeMovies(movies);
+    const movies = await MovieRepository.find({
+      order: {
+        [orderBy.field]: orderBy.dir,
+      },
+      take: limit,
+      skip: offset
+    });
+    return normalizeBasicMovies(movies);
   }
 }

@@ -1,14 +1,13 @@
 import { EventEmitter } from 'events';
-import express, { Router } from 'express';
+import express from 'express';
 import { Config } from '../../lib/Config';
 import { RouterPath } from '../../types/RouterPath';
 import { ListGenreEndpoint } from './ListGenreEndpoint';
-import { RepositoryManager } from '../../lib/repository';
 
-export const createGenreEndpoints = (config: Config, emitter: EventEmitter, db: RepositoryManager): RouterPath => {
+export const createGenreEndpoints = (config: Config, emitter: EventEmitter): RouterPath => {
   const router = express.Router();
   const endpoints: any[] = [
-    new ListGenreEndpoint(emitter, db)
+    new ListGenreEndpoint(emitter)
   ];
   endpoints.forEach(endpoint => endpoint.setupEndpoint(router, config));
 
