@@ -3,6 +3,7 @@ import { Movie } from "./Movie";
 import { Episode } from "./Episode";
 import { UserOngoingMovie } from "./UserOngoingMovie";
 import { UserOngoingEpisode } from "./UserOngoingEpisode";
+import { UserRoles } from "./UserRoles";
 
 @Entity()
 export class User {
@@ -40,4 +41,10 @@ export class User {
     name: 'user_watched_movies'
   })
   watchedMovies: Movie[];
+
+  @ManyToMany(() => UserRoles, role => UserRoles.name, {
+    onDelete: 'CASCADE',
+  })
+  @JoinTable()
+  roles: UserRoles[];
 }

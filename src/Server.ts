@@ -1,5 +1,4 @@
 import "reflect-metadata"
-import { PrismaClient } from '@prisma/client'
 import express, { Express, NextFunction, Request, Response, Router } from 'express';
 import compression from 'compression';
 import cors from 'cors';
@@ -28,7 +27,7 @@ import { createMetadataEndpoints } from './endpoints/metadata';
 import { createShowEndpoints } from './endpoints/show';
 import { ExtractSubtitlesJob } from './lib/job/ExtractSubtitlesJob';
 import { createSearchEndpoints } from './endpoints/search';
-import { createDashboardEndpoints } from './endpoints/setup';
+import { createDashboardEndpoints } from './endpoints/dashboard';
 import { Log } from './lib/Logger';
 import { AppDataSource } from "./DataSource";
 import { MovieRepository } from "./repositories/MovieRepository";
@@ -74,7 +73,8 @@ export class Server {
       createUserEndpoints(this.config, this.emitter),
       createVideoEndpoints(this.config, this.emitter),
       createMetadataEndpoints(this.config, this.emitter),
-      createSearchEndpoints(this.config, this.emitter)
+      createSearchEndpoints(this.config, this.emitter),
+      createDashboardEndpoints(this.config, this.emitter)
     ];
     const apiRouter = Router();
     endpoints.forEach(({ router, path }) => apiRouter.use(path, router));

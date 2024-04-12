@@ -16,6 +16,7 @@ import { EpisodeMetadata } from "./models/EpisodeMetadata";
 import { User } from "./models/User";
 import { UserOngoingMovie } from "./models/UserOngoingMovie";
 import { UserOngoingEpisode } from "./models/UserOngoingEpisode";
+import { UserRoles } from "./models/UserRoles";
 
 export const AppDataSource = new DataSource({
   synchronize: true,
@@ -37,6 +38,7 @@ export const AppDataSource = new DataSource({
     User,
     UserOngoingMovie,
     UserOngoingEpisode,
+    UserRoles,
   ],
   migrations: [],
   subscribers: [],

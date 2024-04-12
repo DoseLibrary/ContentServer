@@ -15,5 +15,14 @@ export const UserRepository = AppDataSource.getRepository(User).extend({
     return this.findOneBy({
       username
     });
+  },
+  adminExists() {
+    return this.findOne({
+      where: {
+        roles: {
+          name: "admin"
+        }
+      }
+    }) !== undefined;
   }
 });

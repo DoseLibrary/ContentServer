@@ -10,17 +10,17 @@ export type GridCardProps = {
 
 const GridCard = ({ title, value, icon, color }: GridCardProps) => {
   return (
-    <div className="bg-white overflow-hidden shadow rounded-lg">
+    <div className="bg-white overflow-hidden shadow rounded-lg dark:bg-gray-800">
       <div className="p-3">
         <div className="flex items-center">
           <div className={`flex items-center justify-center h-12 w-12 ${color}`}>
             {icon({ size: 24 })}
           </div>
           <div className="ml-5">
-            <div className="text-sm font-medium text-gray-500 truncate">
+            <div className="text-sm font-medium text-gray-500 truncate dark:text-gray-200">
               {title}
             </div>
-            <div className="text-2xl font-semibold text-gray-900">
+            <div className="text-2xl font-semibold text-gray-900 dark:text-gray-400">
               {value}
             </div>
           </div>

@@ -10,7 +10,7 @@ export default {
     },
     extend: {},
   },
-  darkMode: false,
+  darkMode: 'class',
   plugins: [],
 }
 
